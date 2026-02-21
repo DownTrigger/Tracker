@@ -57,7 +57,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     }
 
     @objc private func habitTapped() {
-        let vc = NewHabitViewController()
+        let vc = HabitCreationViewController()
         vc.onCreateTracker = { [weak self] tracker in
             self?.onCreateTracker?(tracker)
             self?.navigationController?.dismiss(animated: true)
@@ -66,7 +66,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     }
 
     @objc private func irregularEventTapped() {
-        let vc = NewIrregularEventViewController()
+        let vc = IrregularEventCreationViewController()
         vc.onCreateTracker = { [weak self] tracker in
             self?.onCreateTracker?(tracker)
             self?.navigationController?.dismiss(animated: true)
