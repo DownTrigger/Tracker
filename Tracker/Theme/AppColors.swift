@@ -12,4 +12,5 @@ enum AppColors {
     static var accentRed: UIColor { UIColor(resource: .accentRed) }
     static var accentBlue: UIColor { UIColor(resource: .accentBlue) }
     static var accentBlack: UIColor { UIColor(resource: .accentBlack) }
+    static var accentWhite: UIColor { UIColor(resource: .accentWhite) }
 }
