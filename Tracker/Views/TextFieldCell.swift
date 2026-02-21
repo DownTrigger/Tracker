@@ -13,6 +13,7 @@ final class TextFieldCell: UITableViewCell {
         let field = UITextField()
         field.font = .systemFont(ofSize: 17)
         field.clearButtonMode = .whileEditing
+        field.returnKeyType = .done 
         field.translatesAutoresizingMaskIntoConstraints = false
         return field
     }()
@@ -86,5 +87,10 @@ extension TextFieldCell: UITextFieldDelegate {
         guard let rangeInSwift = Range(range, in: currentText) else { return true }
         let newText = currentText.replacingCharacters(in: rangeInSwift, with: string)
         return newText.count <= Self.maxNameLength
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
