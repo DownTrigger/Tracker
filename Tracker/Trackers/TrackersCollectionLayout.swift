@@ -3,15 +3,19 @@ import UIKit
 enum TrackersCollectionLayout {
 
     static func create() -> UICollectionViewCompositionalLayout {
-        UICollectionViewCompositionalLayout { _, _ in
+        UICollectionViewCompositionalLayout { _, layoutEnvironment in
             let padding: CGFloat = 16
             let spacing: CGFloat = 9
             let cardHeight: CGFloat = 90
             let bottomRowHeight: CGFloat = 34
             let cellHeight = cardHeight + 8 + bottomRowHeight
 
+            let containerWidth = layoutEnvironment.container.effectiveContentSize.width
+            let availableWidth = containerWidth - padding * 2 - spacing
+            let cellWidth = availableWidth / 2
+
             let itemSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1),
+                widthDimension: .absolute(cellWidth),
                 heightDimension: .absolute(cellHeight)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -22,8 +26,7 @@ enum TrackersCollectionLayout {
             )
             let group = NSCollectionLayoutGroup.horizontal(
                 layoutSize: groupSize,
-                subitem: item,
-                count: 2
+                subitems: [item, item]
             )
             group.interItemSpacing = .fixed(spacing)
 

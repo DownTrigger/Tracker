@@ -21,6 +21,7 @@ final class TabBarViewController: UITabBarController {
 
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = AppColors.primaryBackground
         appearance.shadowImage = lineImage
         appearance.shadowColor = .separator
         tabBar.standardAppearance = appearance
@@ -30,7 +31,7 @@ final class TabBarViewController: UITabBarController {
     private func setupViewControllers() {
         let trackersViewController = TrackersViewController()
         let trackersNavController = UINavigationController(rootViewController: trackersViewController)
-        trackersViewController.view.backgroundColor = UIColor(resource: .anyScreenBackground)
+        trackersViewController.view.backgroundColor = AppColors.primaryBackground
         trackersViewController.tabBarItem = UITabBarItem(
             title: "Трекеры",
             image: UIImage(resource: .iconCircle),
@@ -39,7 +40,7 @@ final class TabBarViewController: UITabBarController {
 
         let statisticsViewController = StatisticsViewController()
         let statisticsNavController = UINavigationController(rootViewController: statisticsViewController)
-        statisticsViewController.view.backgroundColor = UIColor(resource: .anyScreenBackground)
+        statisticsViewController.view.backgroundColor = AppColors.primaryBackground
         statisticsViewController.tabBarItem = UITabBarItem(
             title: "Статистика",
             image: UIImage(resource: .iconHare),

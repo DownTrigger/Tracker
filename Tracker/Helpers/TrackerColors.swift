@@ -2,15 +2,24 @@ import UIKit
 
 enum TrackerColors {
     static let palette: [UIColor] = [
-        UIColor(red: 0.99, green: 0.30, blue: 0.24, alpha: 1),
-        UIColor(red: 1.00, green: 0.58, blue: 0.00, alpha: 1),
-        UIColor(red: 1.00, green: 0.80, blue: 0.00, alpha: 1),
-        UIColor(red: 0.45, green: 0.83, blue: 0.49, alpha: 1),
-        UIColor(red: 0.20, green: 0.78, blue: 0.35, alpha: 1),
-        UIColor(red: 0.20, green: 0.66, blue: 0.53, alpha: 1),
-        UIColor(red: 0.12, green: 0.59, blue: 0.95, alpha: 1),
-        UIColor(red: 0.38, green: 0.37, blue: 0.93, alpha: 1),
-        UIColor(red: 0.91, green: 0.33, blue: 0.54, alpha: 1),
+        UIColor(resource: .colorSelection1),
+        UIColor(resource: .colorSelection2),
+        UIColor(resource: .colorSelection3),
+        UIColor(resource: .colorSelection4),
+        UIColor(resource: .colorSelection5),
+        UIColor(resource: .colorSelection6),
+        UIColor(resource: .colorSelection7),
+        UIColor(resource: .colorSelection8),
+        UIColor(resource: .colorSelection9),
+        UIColor(resource: .colorSelection10),
+        UIColor(resource: .colorSelection11),
+        UIColor(resource: .colorSelection12),
+        UIColor(resource: .colorSelection13),
+        UIColor(resource: .colorSelection14),
+        UIColor(resource: .colorSelection15),
+        UIColor(resource: .colorSelection16),
+        UIColor(resource: .colorSelection17),
+        UIColor(resource: .colorSelection18),
     ]
 
     static func color(at index: Int) -> UIColor {

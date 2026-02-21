@@ -4,6 +4,15 @@ final class TrackerCell: UICollectionViewCell {
 
     static let reuseId = "TrackerCell"
 
+    struct ViewModel {
+        let name: String
+        let emoji: String
+        let color: UIColor
+        let daysCount: Int
+        let isCompletedForSelectedDate: Bool
+        let canComplete: Bool 
+    }
+
     // MARK: - Subviews
     private let cardView: UIView = {
         let view = UIView()
@@ -21,7 +30,7 @@ final class TrackerCell: UICollectionViewCell {
 
     private let emojiBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        view.backgroundColor = AppColors.primaryBackground.withAlphaComponent(0.3)
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -41,7 +50,7 @@ final class TrackerCell: UICollectionViewCell {
     private let daysLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .label
+        label.textColor = AppColors.primaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -78,23 +87,16 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Public
     var onCompleteTapped: (() -> Void)?
 
-    func configure(
-        name: String,
-        emoji: String,
-        color: UIColor,
-        daysCount: Int,
-        isCompletedForSelectedDate: Bool,
-        canComplete: Bool
-    ) {
-        titleLabel.text = name
-        emojiLabel.text = emoji
-        cardView.backgroundColor = color
-        completeButton.tintColor = color
-        daysLabel.text = daysCountText(daysCount)
-        let image = isCompletedForSelectedDate ? UIImage(resource: .doneButton) : UIImage(resource: .plusButton)
+    func setup(viewModel: ViewModel) {
+        titleLabel.text = viewModel.name
+        emojiLabel.text = viewModel.emoji
+        cardView.backgroundColor = viewModel.color
+        completeButton.tintColor = viewModel.color
+        daysLabel.text = daysCountText(viewModel.daysCount)
+        let image = viewModel.isCompletedForSelectedDate ? UIImage(resource: .doneButton) : UIImage(resource: .plusButton)
         completeButton.setImage(image, for: .normal)
-        completeButton.alpha = canComplete ? 1 : 0.3
-        completeButton.isEnabled = canComplete
+        completeButton.alpha = viewModel.canComplete ? 1 : 0.3
+        completeButton.isEnabled = viewModel.canComplete
     }
 
     @objc private func completeButtonTapped() {
