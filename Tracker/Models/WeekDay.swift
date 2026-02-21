@@ -1,6 +1,8 @@
 import Foundation
 
 enum WeekDay: Int, CaseIterable {
+
+    // MARK: - Cases
     case sunday = 1
     case monday = 2
     case tuesday = 3
@@ -8,9 +10,12 @@ enum WeekDay: Int, CaseIterable {
     case thursday = 5
     case friday = 6
     case saturday = 7
-    
+
+    // MARK: - Static
     static let displayOrder: [WeekDay] = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
-    
+    static let fullWeekSchedule: [Int] = allCases.map(\.rawValue)
+
+    // MARK: - Computed
     var shortTitle: String {
         switch self {
         case .sunday: return "Вс"

@@ -2,8 +2,10 @@ import UIKit
 
 final class ScheduleDayCell: UITableViewCell {
 
+    // MARK: - Constants
     static let reuseId = "ScheduleDayCell"
 
+    // MARK: - UI
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17)
@@ -21,14 +23,24 @@ final class ScheduleDayCell: UITableViewCell {
 
     private var onSwitchChanged: ((Bool) -> Void)?
 
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(switchControl)
+        setupHierarchy()
+        setupConstraints()
         backgroundColor = AppColors.secondaryBackground
         selectionStyle = .none
         separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         switchControl.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
+    }
+
+    // MARK: - Setup
+    private func setupHierarchy() {
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(switchControl)
+    }
+
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -39,12 +51,14 @@ final class ScheduleDayCell: UITableViewCell {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    // MARK: - Public
     func configure(title: String, isOn: Bool, onSwitchChanged: @escaping (Bool) -> Void) {
         titleLabel.text = title
         switchControl.isOn = isOn
         self.onSwitchChanged = onSwitchChanged
     }
 
+    // MARK: - Actions
     @objc private func switchChanged() {
         onSwitchChanged?(switchControl.isOn)
     }

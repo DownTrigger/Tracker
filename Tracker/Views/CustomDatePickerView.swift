@@ -13,6 +13,17 @@ final class CustomDatePickerView: UIView {
 
     var onDateChanged: ((Date) -> Void)?
 
+    // MARK: - Constants
+    private enum Constants {
+        static let width: CGFloat = 77
+        static let height: CGFloat = 34
+        static let cornerRadius: CGFloat = 8
+        static let fontSize: CGFloat = 17
+        static let pickerAlphaForHitTesting: CGFloat = 0.02
+        static let pressAnimationDuration: TimeInterval = 0.15
+        static let pressedAlpha: CGFloat = 0.7
+    }
+
     // MARK: - Subviews
     private let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
@@ -53,17 +64,6 @@ final class CustomDatePickerView: UIView {
         gesture.delaysTouchesEnded = false
         return gesture
     }()
-
-    // MARK: - Constants
-    private enum Constants {
-        static let width: CGFloat = 77
-        static let height: CGFloat = 34
-        static let cornerRadius: CGFloat = 8
-        static let fontSize: CGFloat = 17
-        static let pickerAlphaForHitTesting: CGFloat = 0.02
-        static let pressAnimationDuration: TimeInterval = 0.15
-        static let pressedAlpha: CGFloat = 0.7
-    }
 
     // MARK: - Init
     override init(frame: CGRect) {
@@ -134,7 +134,7 @@ final class CustomDatePickerView: UIView {
         onDateChanged?(datePicker.date)
     }
 
-    // MARK: - Press animation
+    // MARK: - Private
     private func setPressed(_ pressed: Bool) {
         UIView.animate(
             withDuration: Constants.pressAnimationDuration,

@@ -9,7 +9,7 @@ final class TabBarViewController: UITabBarController {
         setupViewControllers()
     }
 
-    // MARK: - Private
+    // MARK: - Setup
     private func configureTabBarAppearance() {
         let lineHeight: CGFloat = 2.0 / UIScreen.main.scale
         let size = CGSize(width: 1, height: lineHeight)

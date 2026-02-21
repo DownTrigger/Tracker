@@ -2,14 +2,13 @@ import UIKit
 
 final class TextFieldCell: UITableViewCell {
 
+    // MARK: - Constants
     static let reuseId = "TextFieldCell"
-    
     static let maxNameLength = 38
     static let nameLimitFooterText = "Ограничение 38 символов"
     static let nameLimitCellReuseId = "NameLimitCell"
 
-    private var onText: ((String?) -> Void)?
-
+    // MARK: - UI
     private let textField: UITextField = {
         let field = UITextField()
         field.font = .systemFont(ofSize: 17)
@@ -18,31 +17,47 @@ final class TextFieldCell: UITableViewCell {
         return field
     }()
 
+    // MARK: - Callbacks
+    private var onText: ((String?) -> Void)?
+
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        contentView.addSubview(textField)
+        setupHierarchy()
+        setupConstraints()
         textField.delegate = self
+        textField.addTarget(self, action: #selector(editingChanged), for: .editingChanged)
         backgroundColor = AppColors.secondaryBackground
+    }
+
+    // MARK: - Setup
+    private func setupHierarchy() {
+        contentView.addSubview(textField)
+    }
+
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             textField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             textField.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
-        textField.addTarget(self, action: #selector(editingChanged), for: .editingChanged)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    // MARK: - Public
     func configure(placeholder: String, currentText: String, onText: @escaping (String?) -> Void) {
         textField.placeholder = placeholder
         textField.text = currentText
         self.onText = onText
     }
 
+    // MARK: - Actions
     @objc private func editingChanged() {
         onText?(textField.text)
     }
 
+    // MARK: - Static
     static func makeNameLimitFooter() -> UIView {
         let label = UILabel()
         label.text = nameLimitFooterText

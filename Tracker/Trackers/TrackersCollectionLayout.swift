@@ -2,6 +2,7 @@ import UIKit
 
 enum TrackersCollectionLayout {
 
+    // MARK: - Public
     static func create() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { _, layoutEnvironment in
             let padding: CGFloat = 16

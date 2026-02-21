@@ -1,6 +1,8 @@
 import UIKit
 
 enum TrackerColors {
+
+    // MARK: - Palette
     static let palette: [UIColor] = [
         UIColor(resource: .colorSelection1),
         UIColor(resource: .colorSelection2),
@@ -22,6 +24,7 @@ enum TrackerColors {
         UIColor(resource: .colorSelection18),
     ]
 
+    // MARK: - Public
     static func color(at index: Int) -> UIColor {
         let safe = (index % palette.count + palette.count) % palette.count
         return palette[safe]

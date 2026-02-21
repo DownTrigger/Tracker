@@ -2,8 +2,10 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
 
+    // MARK: - Constants
     static let reuseId = "TrackerCell"
 
+    // MARK: - Nested types
     struct ViewModel {
         let name: String
         let emoji: String
@@ -73,6 +75,7 @@ final class TrackerCell: UICollectionViewCell {
         setup()
     }
 
+    // MARK: - Lifecycle
     override func prepareForReuse() {
         super.prepareForReuse()
         titleLabel.text = nil
@@ -84,9 +87,10 @@ final class TrackerCell: UICollectionViewCell {
         onCompleteTapped = nil
     }
 
-    // MARK: - Public
+    // MARK: - Callbacks
     var onCompleteTapped: (() -> Void)?
 
+    // MARK: - Public
     func setup(viewModel: ViewModel) {
         titleLabel.text = viewModel.name
         emojiLabel.text = viewModel.emoji
@@ -99,32 +103,28 @@ final class TrackerCell: UICollectionViewCell {
         completeButton.isEnabled = viewModel.canComplete
     }
 
+    // MARK: - Actions
     @objc private func completeButtonTapped() {
         onCompleteTapped?()
     }
 
-    // MARK: - Private
-    private func daysCountText(_ n: Int) -> String {
-        let mod10 = n % 10
-        let mod100 = n % 100
-        if (11...14).contains(mod100) { return "\(n) дней" }
-        switch mod10 {
-        case 1: return "\(n) день"
-        case 2, 3, 4: return "\(n) дня"
-        default: return "\(n) дней"
-        }
+    // MARK: - Setup
+    private func setup() {
+        setupHierarchy()
+        setupConstraints()
+        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
     }
 
-    private func setup() {
+    private func setupHierarchy() {
         contentView.addSubview(cardView)
         cardView.addSubview(emojiBackgroundView)
         cardView.addSubview(emojiLabel)
         cardView.addSubview(titleLabel)
         contentView.addSubview(daysLabel)
         contentView.addSubview(completeButton)
+    }
 
-        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
-
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
             cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -152,5 +152,17 @@ final class TrackerCell: UICollectionViewCell {
             daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             daysLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
+    }
+
+    // MARK: - Private
+    private func daysCountText(_ n: Int) -> String {
+        let mod10 = n % 10
+        let mod100 = n % 100
+        if (11...14).contains(mod100) { return "\(n) дней" }
+        switch mod10 {
+        case 1: return "\(n) день"
+        case 2, 3, 4: return "\(n) дня"
+        default: return "\(n) дней"
+        }
     }
 }

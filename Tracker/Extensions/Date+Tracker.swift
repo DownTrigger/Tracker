@@ -1,6 +1,8 @@
 import Foundation
 
 extension Date {
+
+    // MARK: - Formatting
     static func trackerDateString(from date: Date = Date()) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yy"

@@ -31,7 +31,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - UI
     private lazy var searchController: UISearchController = {
         let controller = UISearchController(searchResultsController: nil)
-        controller.searchBar.placeholder = "Поиск"
+        controller.searchBar.placeholder = Strings.searchPlaceholder
         controller.searchBar.backgroundImage = UIImage()
         controller.searchResultsUpdater = self
         controller.obscuresBackgroundDuringPresentation = false
@@ -59,22 +59,22 @@ final class TrackersViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
-    let emptyStateImageView: UIImageView = {
+
+    private let emptyStateImageView: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(resource: .emptyState)
         return image
     }()
-    
-    let emptyStateLabel: UILabel = {
+
+    private let emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.text = Strings.emptyStateText
+        label.font = UIFont.systemFont(ofSize: Constants.emptyStateFontSize)
         label.textAlignment = .center
         label.numberOfLines = 0
         return label
     }()
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -82,6 +82,75 @@ final class TrackersViewController: UIViewController {
         setupNavigationBar()
         setupUI()
         setupButtonActions()
+    }
+
+    // MARK: - Setup
+    private func setupNavigationBar() {
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        navigationItem.title = Strings.screenTitle
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+
+        let addButton = UIButton(type: .system)
+        addButton.setImage(UIImage(resource: .addButton), for: .normal)
+        addButton.tintColor = AppColors.primaryLabel
+        addButton.addTarget(self, action: #selector(addTrackerTapped), for: .touchUpInside)
+
+        let addButtonContainer = UIView()
+        addButtonContainer.translatesAutoresizingMaskIntoConstraints = false
+        addButtonContainer.addSubview(addButton)
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            addButtonContainer.widthAnchor.constraint(equalToConstant: Constants.addButtonContainerWidth),
+            addButtonContainer.heightAnchor.constraint(equalToConstant: Constants.addButtonContainerHeight),
+            addButton.leadingAnchor.constraint(equalTo: addButtonContainer.leadingAnchor, constant: Constants.addButtonLeadingOffset),
+            addButton.centerYAnchor.constraint(equalTo: addButtonContainer.centerYAnchor),
+            addButton.widthAnchor.constraint(equalToConstant: Constants.addButtonSize),
+            addButton.heightAnchor.constraint(equalToConstant: Constants.addButtonSize)
+        ])
+
+        let addItem = UIBarButtonItem(customView: addButtonContainer)
+        navigationItem.leftBarButtonItem = addItem
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: customDatePicker)
+    }
+
+    private func setupUI() {
+        setupHierarchy()
+        setupConstraints()
+        updateEmptyStateVisibility()
+    }
+
+    private func setupHierarchy() {
+        view.addSubview(collectionView)
+        view.addSubview(emptyStateImageView)
+        view.addSubview(emptyStateLabel)
+        emptyStateImageView.translatesAutoresizingMaskIntoConstraints = false
+        emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateImageView.heightAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
+            emptyStateImageView.widthAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
+            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Constants.emptyStateSpacing),
+            emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalPadding),
+            emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalPadding),
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+    }
+
+    private func setupButtonActions() {
+        customDatePicker.onDateChanged = { [weak self] date in
+            self?.datePickerValueChanged(date)
+        }
     }
 
     // MARK: - Helpers
@@ -101,12 +170,12 @@ final class TrackersViewController: UIViewController {
     }
 
     private func isCompletedToday(trackerId: UUID) -> Bool {
-        return completedTrackers.contains { record in
+        completedTrackers.contains { record in
             record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
         }
     }
-    
-    // MARK: - Data
+
+    // MARK: - Data mutations
     func completeTracker(id: UUID, date: Date) {
         completedTrackers.append(TrackerRecord(trackerId: id, date: date))
     }
@@ -127,13 +196,13 @@ final class TrackersViewController: UIViewController {
         collectionView.reloadData()
     }
 
-    // MARK: - Action
+    // MARK: - Actions
     @objc private func addTrackerTapped() {
         let typeSelectionVC = TrackerTypeSelectionViewController()
         typeSelectionVC.onCreateTracker = { [weak self] tracker in
             guard let self else { return }
             if self.categories.isEmpty {
-                self.categories = [TrackerCategory(title: "Важное", trackers: [tracker])]
+                self.categories = [TrackerCategory(title: Strings.defaultCategoryName, trackers: [tracker])]
                 self.updateEmptyStateVisibility()
                 self.collectionView.reloadData()
             } else {
@@ -144,77 +213,11 @@ final class TrackersViewController: UIViewController {
         let nav = UINavigationController(rootViewController: typeSelectionVC)
         present(nav, animated: true)
     }
-    
+
     private func datePickerValueChanged(_ date: Date) {
         currentDate = date
         collectionView.reloadData()
         updateEmptyStateVisibility()
-    }
-    
-    // MARK: - Setup
-    private func setupUI() {
-        view.addSubview(collectionView)
-        view.addSubview(emptyStateImageView)
-        view.addSubview(emptyStateLabel)
-
-        emptyStateImageView.translatesAutoresizingMaskIntoConstraints = false
-        emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateImageView.heightAnchor.constraint(equalToConstant: 80),
-            emptyStateImageView.widthAnchor.constraint(equalToConstant: 80),
-
-            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: 8),
-            emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
-        updateEmptyStateVisibility()
-    }
-
-    private func setupButtonActions() {
-        customDatePicker.onDateChanged = { [weak self] date in
-            self?.datePickerValueChanged(date)
-        }
-    }
-
-    private func setupNavigationBar() {
-        navigationController?.setNavigationBarHidden(false, animated: false)
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.largeTitleDisplayMode = .always
-        navigationItem.title = "Трекеры"
-        navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
-
-        let addButton = UIButton(type: .system)
-        addButton.setImage(UIImage(resource: .addButton), for: .normal)
-        addButton.tintColor = AppColors.primaryLabel
-        addButton.addTarget(self, action: #selector(addTrackerTapped), for: .touchUpInside)
-
-        let addButtonContainer = UIView()
-        addButtonContainer.translatesAutoresizingMaskIntoConstraints = false
-        addButtonContainer.addSubview(addButton)
-        addButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            addButtonContainer.widthAnchor.constraint(equalToConstant: 52),
-            addButtonContainer.heightAnchor.constraint(equalToConstant: 44),
-            addButton.leadingAnchor.constraint(equalTo: addButtonContainer.leadingAnchor, constant: -12),
-            addButton.centerYAnchor.constraint(equalTo: addButtonContainer.centerYAnchor),
-            addButton.widthAnchor.constraint(equalToConstant: 44),
-            addButton.heightAnchor.constraint(equalToConstant: 44)
-        ])
-
-        let addItem = UIBarButtonItem(customView: addButtonContainer)
-        navigationItem.leftBarButtonItem = addItem
-
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: customDatePicker)
     }
 }
 
@@ -223,18 +226,20 @@ extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         filteredCategories.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         filteredCategories[section].trackers.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.reuseId, for: indexPath) as! TrackerCell
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.reuseId, for: indexPath) as? TrackerCell else {
+            fatalError("Failed to dequeue \(TrackerCell.self). Check cell registration.")
+        }
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
         let days = completedDaysCount(for: tracker.id)
         let isCompleted = isCompletedToday(trackerId: tracker.id)
         let canComplete = !isFutureDate(currentDate)
-        
+
         cell.setup(viewModel: .init(
             name: tracker.name,
             emoji: tracker.emoji,
@@ -243,7 +248,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             isCompletedForSelectedDate: isCompleted,
             canComplete: canComplete
         ))
-        
+
         cell.onCompleteTapped = { [weak self] in
             guard let self else { return }
             let date = self.currentDate
@@ -266,18 +271,20 @@ extension TrackersViewController: UICollectionViewDataSource {
         guard kind == UICollectionView.elementKindSectionHeader else {
             return UICollectionReusableView()
         }
-        let header = collectionView.dequeueReusableSupplementaryView(
+        guard let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: TrackerSectionHeader.reuseId,
             for: indexPath
-        ) as! TrackerSectionHeader
+        ) as? TrackerSectionHeader else {
+            fatalError("Failed to dequeue \(TrackerSectionHeader.self). Check supplementary view registration.")
+        }
         header.configure(title: filteredCategories[indexPath.section].title)
         return header
     }
 }
 
 // MARK: - UICollectionViewDelegate
-extension TrackersViewController: UICollectionViewDelegate {}
+extension TrackersViewController: UICollectionViewDelegate { }
 
 // MARK: - UISearchResultsUpdating
 extension TrackersViewController: UISearchResultsUpdating {
@@ -285,5 +292,26 @@ extension TrackersViewController: UISearchResultsUpdating {
         searchText = (searchController.searchBar.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         collectionView.reloadData()
         updateEmptyStateVisibility()
+    }
+}
+
+// MARK: - Constants
+private extension TrackersViewController {
+    enum Constants {
+        static let emptyStateFontSize: CGFloat = 12
+        static let emptyStateImageSize: CGFloat = 80
+        static let emptyStateSpacing: CGFloat = 8
+        static let horizontalPadding: CGFloat = 16
+        static let addButtonContainerWidth: CGFloat = 52
+        static let addButtonContainerHeight: CGFloat = 44
+        static let addButtonSize: CGFloat = 44
+        static let addButtonLeadingOffset: CGFloat = -12
+    }
+
+    enum Strings {
+        static let screenTitle = "Трекеры"
+        static let searchPlaceholder = "Поиск"
+        static let emptyStateText = "Что будем отслеживать?"
+        static let defaultCategoryName = "Важное"
     }
 }

@@ -1,6 +1,8 @@
 import UIKit
 
 enum AppColors {
+
+    // MARK: - Semantic colors
     static var primaryLabel: UIColor { UIColor(resource: .primaryLabel) }
     static var primaryBackground: UIColor { UIColor(resource: .primaryBackground) }
     static var secondaryBackground: UIColor { UIColor(resource: .secondaryBackground) }

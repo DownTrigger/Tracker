@@ -2,8 +2,10 @@ import UIKit
 
 final class SubtitleCell: UITableViewCell {
 
+    // MARK: - Constants
     static let reuseId = "SubtitleCell"
 
+    // MARK: - UI
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17)
@@ -29,13 +31,23 @@ final class SubtitleCell: UITableViewCell {
         return stack
     }()
 
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupHierarchy()
+        setupConstraints()
+        backgroundColor = AppColors.secondaryBackground
+        accessoryType = .disclosureIndicator
+    }
+
+    // MARK: - Setup
+    private func setupHierarchy() {
         labelsStack.addArrangedSubview(titleLabel)
         labelsStack.addArrangedSubview(subtitleLabel)
         contentView.addSubview(labelsStack)
-        backgroundColor = AppColors.secondaryBackground
-        accessoryType = .disclosureIndicator
+    }
+
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             labelsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             labelsStack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -45,6 +57,7 @@ final class SubtitleCell: UITableViewCell {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    // MARK: - Public
     func configure(title: String, subtitle: String) {
         titleLabel.text = title
         subtitleLabel.text = subtitle.isEmpty ? nil : subtitle
