@@ -63,7 +63,7 @@ final class OnboardingViewController: UIViewController {
 
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = AppColors.primaryBackground
         addChild(pageViewController)
         setupHierarchy()
         setupConstraints()
