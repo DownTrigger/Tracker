@@ -7,6 +7,7 @@ final class TrackersViewController: UIViewController {
     var completedTrackers: [TrackerRecord] = []
     var currentDate: Date = Date()
     private var searchText: String = ""
+    private var completedTrackerIdsForSelectedDate: Set<UUID> = []
 
     private var filteredCategories: [TrackerCategory] {
         let calendar = Calendar.current
@@ -79,6 +80,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         currentDate = customDatePicker.date
+        rebuildCompletedIdsForSelectedDate()
         setupNavigationBar()
         setupUI()
         setupButtonActions()
@@ -170,18 +172,29 @@ final class TrackersViewController: UIViewController {
     }
 
     private func isCompletedToday(trackerId: UUID) -> Bool {
-        completedTrackers.contains { record in
-            record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
-        }
+        completedTrackerIdsForSelectedDate.contains(trackerId)
+    }
+
+    private func rebuildCompletedIdsForSelectedDate() {
+        let calendar = Calendar.current
+        completedTrackerIdsForSelectedDate = Set(
+            completedTrackers
+                .filter { calendar.isDate($0.date, inSameDayAs: currentDate) }
+                .map(\.trackerId)
+        )
     }
 
     // MARK: - Data mutations
     func completeTracker(id: UUID, date: Date) {
         completedTrackers.append(TrackerRecord(trackerId: id, date: date))
+        if Calendar.current.isDate(date, inSameDayAs: currentDate) {
+            completedTrackerIdsForSelectedDate.insert(id)
+        }
     }
 
     func uncompleteTracker(id: UUID, date: Date) {
         completedTrackers.removeAll { $0.trackerId == id && Calendar.current.isDate($0.date, inSameDayAs: date) }
+        completedTrackerIdsForSelectedDate.remove(id)
     }
 
     func addTracker(_ tracker: Tracker, toCategoryAt index: Int) {
@@ -216,6 +229,7 @@ final class TrackersViewController: UIViewController {
 
     private func datePickerValueChanged(_ date: Date) {
         currentDate = date
+        rebuildCompletedIdsForSelectedDate()
         collectionView.reloadData()
         updateEmptyStateVisibility()
     }
