@@ -3,7 +3,7 @@ import UIKit
 final class OnboardingViewController: UIViewController {
 
     // MARK: - Data
-    private static let pages: [OnboardingPageViewController.PageContent] = [
+    private static let pages: [PageContent] = [
         .init(
             title: Strings.page1Title,
             image: UIImage(resource: .blueBackground)

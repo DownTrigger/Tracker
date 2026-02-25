@@ -156,6 +156,10 @@ final class HabitCreationViewController: UIViewController {
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
+        let nameCellIndexPath = IndexPath(row: NameRow.textField.rawValue, section: Section.name.rawValue)
+        if let nameCell = tableView.cellForRow(at: nameCellIndexPath) {
+            nameCell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
+        }
     }
 
     // MARK: - Cell Configuration
@@ -170,6 +174,7 @@ final class HabitCreationViewController: UIViewController {
             fatalError("Failed to dequeue \(TextFieldCell.self). Check cell registration.")
         }
         cell.configure(placeholder: Strings.namePlaceholder, currentText: trackerName, onText: handleNameChange)
+        cell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
         return cell
     }
 

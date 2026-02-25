@@ -37,6 +37,7 @@ final class SubtitleCell: UITableViewCell {
         setupHierarchy()
         setupConstraints()
         backgroundColor = AppColors.secondaryBackground
+        selectionStyle = .none
         accessoryType = .disclosureIndicator
     }
 

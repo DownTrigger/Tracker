@@ -298,7 +298,9 @@ extension TrackersViewController: UICollectionViewDataSource {
 }
 
 // MARK: - UICollectionViewDelegate
-extension TrackersViewController: UICollectionViewDelegate { }
+extension TrackersViewController: UICollectionViewDelegate {
+    // TODO: No methods needed yet. 
+}
 
 // MARK: - UISearchResultsUpdating
 extension TrackersViewController: UISearchResultsUpdating {

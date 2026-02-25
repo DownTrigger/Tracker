@@ -136,6 +136,10 @@ final class IrregularEventCreationViewController: UIViewController {
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
+        let nameCellIndexPath = IndexPath(row: Row.textField.rawValue, section: Section.name.rawValue)
+        if let nameCell = tableView.cellForRow(at: nameCellIndexPath) {
+            nameCell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
+        }
     }
 
     // MARK: - Cell Configuration
@@ -150,6 +154,7 @@ final class IrregularEventCreationViewController: UIViewController {
             fatalError("Failed to dequeue \(TextFieldCell.self). Check cell registration.")
         }
         cell.configure(placeholder: Strings.namePlaceholder, currentText: trackerName, onText: handleNameChange)
+        cell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
         return cell
     }
 

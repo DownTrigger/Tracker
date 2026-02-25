@@ -29,6 +29,7 @@ final class TextFieldCell: UITableViewCell {
         textField.delegate = self
         textField.addTarget(self, action: #selector(editingChanged), for: .editingChanged)
         backgroundColor = AppColors.secondaryBackground
+        selectionStyle = .none
     }
 
     // MARK: - Setup

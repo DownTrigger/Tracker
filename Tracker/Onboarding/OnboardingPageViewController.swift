@@ -2,12 +2,6 @@ import UIKit
 
 final class OnboardingPageViewController: UIViewController {
 
-    // MARK: - Model
-    struct PageContent {
-        let title: String
-        let image: UIImage
-    }
-
     let pageIndex: Int
 
     // MARK: - UI

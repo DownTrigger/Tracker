@@ -99,7 +99,9 @@ extension ScheduleViewController: UITableViewDataSource {
 }
 
 // MARK: - UITableViewDelegate
-extension ScheduleViewController: UITableViewDelegate { }
+extension ScheduleViewController: UITableViewDelegate {
+    // TODO: No methods needed yet.
+}
 
 // MARK: - Constants
 private extension ScheduleViewController {
