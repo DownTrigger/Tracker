@@ -1,11 +1,9 @@
 import UIKit
 
-class ViewController: UIViewController {
+final class StatisticsViewController: UIViewController {
 
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-
-
 }
-
