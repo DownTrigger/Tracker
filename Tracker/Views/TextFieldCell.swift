@@ -24,7 +24,7 @@ final class TextFieldCell: UITableViewCell {
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         textField.delegate = self
         textField.addTarget(self, action: #selector(editingChanged), for: .editingChanged)
@@ -32,8 +32,8 @@ final class TextFieldCell: UITableViewCell {
         selectionStyle = .none
     }
 
-    // MARK: - Setup
-    private func setupHierarchy() {
+    // MARK: - Private
+    private func setupViewHierarchy() {
         contentView.addSubview(textField)
     }
 

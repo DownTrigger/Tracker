@@ -2,29 +2,26 @@ import UIKit
 
 final class CustomDatePickerView: UIView {
 
-    // MARK: - Public API
-    var date: Date {
-        get { datePicker.date }
-        set {
-            datePicker.date = newValue
-            updateDateLabel()
-        }
-    }
-
+    // MARK: - Callbacks
     var onDateChanged: ((Date) -> Void)?
 
     // MARK: - Constants
     private enum Constants {
+        // MARK: - Size
         static let width: CGFloat = 77
         static let height: CGFloat = 34
+
+        // MARK: - Appearance
         static let cornerRadius: CGFloat = 8
         static let fontSize: CGFloat = 17
+
+        // MARK: - Interaction
         static let pickerAlphaForHitTesting: CGFloat = 0.02
         static let pressAnimationDuration: TimeInterval = 0.15
         static let pressedAlpha: CGFloat = 0.7
     }
 
-    // MARK: - Subviews
+    // MARK: - UI
     private let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
@@ -68,24 +65,24 @@ final class CustomDatePickerView: UIView {
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setup()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setup()
-    }
-
-    // MARK: - Setup
-    private func setup() {
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         updateDateLabel()
         datePicker.addTarget(self, action: #selector(pickerValueChanged), for: .valueChanged)
         datePicker.addGestureRecognizer(pressGesture)
     }
 
-    private func setupHierarchy() {
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupViewHierarchy()
+        setupConstraints()
+        updateDateLabel()
+        datePicker.addTarget(self, action: #selector(pickerValueChanged), for: .valueChanged)
+        datePicker.addGestureRecognizer(pressGesture)
+    }
+
+    // MARK: - Private
+    private func setupViewHierarchy() {
         addSubview(containerView)
         containerView.addSubview(dateLabel)
         addSubview(datePicker)
@@ -111,6 +108,15 @@ final class CustomDatePickerView: UIView {
             datePicker.topAnchor.constraint(equalTo: topAnchor),
             datePicker.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+    }
+
+    // MARK: - Public
+    var date: Date {
+        get { datePicker.date }
+        set {
+            datePicker.date = newValue
+            updateDateLabel()
+        }
     }
 
     private func updateDateLabel() {

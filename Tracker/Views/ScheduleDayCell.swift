@@ -26,7 +26,7 @@ final class ScheduleDayCell: UITableViewCell {
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         backgroundColor = AppColors.secondaryBackground
         selectionStyle = .none
@@ -34,8 +34,8 @@ final class ScheduleDayCell: UITableViewCell {
         switchControl.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
     }
 
-    // MARK: - Setup
-    private func setupHierarchy() {
+    // MARK: - Private
+    private func setupViewHierarchy() {
         contentView.addSubview(titleLabel)
         contentView.addSubview(switchControl)
     }

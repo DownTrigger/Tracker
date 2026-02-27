@@ -254,7 +254,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         let isCompleted = isCompletedToday(trackerId: tracker.id)
         let canComplete = !isFutureDate(currentDate)
 
-        cell.setup(viewModel: .init(
+        cell.configure(viewModel: .init(
             name: tracker.name,
             emoji: tracker.emoji,
             color: TrackerColors.color(at: tracker.color),
@@ -314,10 +314,15 @@ extension TrackersViewController: UISearchResultsUpdating {
 // MARK: - Constants
 private extension TrackersViewController {
     enum Constants {
+        // MARK: - Empty state
         static let emptyStateFontSize: CGFloat = 12
         static let emptyStateImageSize: CGFloat = 80
         static let emptyStateSpacing: CGFloat = 8
+
+        // MARK: - Layout
         static let horizontalPadding: CGFloat = 16
+
+        // MARK: - Add button
         static let addButtonContainerWidth: CGFloat = 52
         static let addButtonContainerHeight: CGFloat = 44
         static let addButtonSize: CGFloat = 44

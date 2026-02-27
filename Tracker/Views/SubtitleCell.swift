@@ -34,15 +34,15 @@ final class SubtitleCell: UITableViewCell {
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         backgroundColor = AppColors.secondaryBackground
         selectionStyle = .none
         accessoryType = .disclosureIndicator
     }
 
-    // MARK: - Setup
-    private func setupHierarchy() {
+    // MARK: - Private
+    private func setupViewHierarchy() {
         labelsStack.addArrangedSubview(titleLabel)
         labelsStack.addArrangedSubview(subtitleLabel)
         contentView.addSubview(labelsStack)

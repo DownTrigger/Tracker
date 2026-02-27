@@ -89,9 +89,12 @@ final class TrackerTypeSelectionViewController: UIViewController {
 // MARK: - Constants
 private extension TrackerTypeSelectionViewController {
     enum Constants {
+        // MARK: - Buttons
         static let buttonFontSize: CGFloat = 16
         static let buttonCornerRadius: CGFloat = 16
         static let buttonHeight: CGFloat = 60
+
+        // MARK: - Layout
         static let stackSpacing: CGFloat = 16
         static let horizontalPadding: CGFloat = 20
     }

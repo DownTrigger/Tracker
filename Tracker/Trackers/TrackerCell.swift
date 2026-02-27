@@ -15,7 +15,7 @@ final class TrackerCell: UICollectionViewCell {
         let canComplete: Bool 
     }
 
-    // MARK: - Subviews
+    // MARK: - UI
     private let cardView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
@@ -67,12 +67,16 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setup()
+        setupViewHierarchy()
+        setupConstraints()
+        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setup()
+        setupViewHierarchy()
+        setupConstraints()
+        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
     }
 
     // MARK: - Lifecycle
@@ -91,7 +95,7 @@ final class TrackerCell: UICollectionViewCell {
     var onCompleteTapped: (() -> Void)?
 
     // MARK: - Public
-    func setup(viewModel: ViewModel) {
+    func configure(viewModel: ViewModel) {
         titleLabel.text = viewModel.name
         emojiLabel.text = viewModel.emoji
         cardView.backgroundColor = viewModel.color
@@ -108,14 +112,8 @@ final class TrackerCell: UICollectionViewCell {
         onCompleteTapped?()
     }
 
-    // MARK: - Setup
-    private func setup() {
-        setupHierarchy()
-        setupConstraints()
-        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
-    }
-
-    private func setupHierarchy() {
+    // MARK: - Private
+    private func setupViewHierarchy() {
         contentView.addSubview(cardView)
         cardView.addSubview(emojiBackgroundView)
         cardView.addSubview(emojiLabel)
@@ -154,7 +152,6 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
 
-    // MARK: - Private
     private func daysCountText(_ n: Int) -> String {
         let mod10 = n % 10
         let mod100 = n % 100
