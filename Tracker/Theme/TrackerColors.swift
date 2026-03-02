@@ -17,6 +17,7 @@ enum TrackerColors {
 
     // MARK: - Public
     static func color(at index: Int) -> UIColor {
+        guard !palette.isEmpty else { return .systemBlue }
         let safe = (index % palette.count + palette.count) % palette.count
         return palette[safe]
     }
