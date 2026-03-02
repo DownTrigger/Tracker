@@ -274,7 +274,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             } else {
                 self.completeTracker(id: tracker.id, date: date)
             }
-            collectionView.reloadItems(at: [indexPath])
+            collectionView.reloadData()
         }
         return cell
     }
