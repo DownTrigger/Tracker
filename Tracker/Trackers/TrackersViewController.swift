@@ -194,7 +194,9 @@ final class TrackersViewController: UIViewController {
 
     func uncompleteTracker(id: UUID, date: Date) {
         completedTrackers.removeAll { $0.trackerId == id && Calendar.current.isDate($0.date, inSameDayAs: date) }
-        completedTrackerIdsForSelectedDate.remove(id)
+        if Calendar.current.isDate(date, inSameDayAs: currentDate) {
+            completedTrackerIdsForSelectedDate.remove(id)
+        }
     }
 
     func addTracker(_ tracker: Tracker, toCategoryAt index: Int) {
