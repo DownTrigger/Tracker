@@ -3,10 +3,14 @@ import Foundation
 extension Date {
 
     // MARK: - Formatting
+    private static let trackerDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd.MM.yy"
+        f.locale = .current
+        return f
+    }()
+
     static func trackerDateString(from date: Date = Date()) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yy"
-        formatter.locale = Locale.current
-        return formatter.string(from: date)
+        trackerDateFormatter.string(from: date)
     }
 }
