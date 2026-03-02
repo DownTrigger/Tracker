@@ -36,8 +36,8 @@ class TrackerCreationViewController: UIViewController {
         table.register(TextFieldCell.self, forCellReuseIdentifier: TextFieldCell.reuseId)
         table.register(UITableViewCell.self, forCellReuseIdentifier: TextFieldCell.nameLimitCellReuseId)
         table.register(SubtitleCell.self, forCellReuseIdentifier: SubtitleCell.reuseId)
-        table.register(UITableViewCell.self, forCellReuseIdentifier: Constants.emojiSectionCellId)
-        table.register(UITableViewCell.self, forCellReuseIdentifier: Constants.colorSectionCellId)
+        table.register(EmojiSectionCell.self, forCellReuseIdentifier: EmojiSectionCell.reuseId)
+        table.register(ColorSectionCell.self, forCellReuseIdentifier: ColorSectionCell.reuseId)
         table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
@@ -66,26 +66,6 @@ class TrackerCreationViewController: UIViewController {
         button.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
-    }()
-
-    lazy var emojiSelectionView: EmojiSelectionView = {
-        let view = EmojiSelectionView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.onEmojiSelected = { [weak self] emoji in
-            self?.selectedEmoji = emoji
-            self?.updateCreateButtonState()
-        }
-        return view
-    }()
-
-    lazy var colorSelectionView: ColorSelectionView = {
-        let view = ColorSelectionView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.onColorSelected = { [weak self] index in
-            self?.selectedColorIndex = index
-            self?.updateCreateButtonState()
-        }
-        return view
     }()
 
     private let buttonStack: UIStackView = {
@@ -208,38 +188,24 @@ class TrackerCreationViewController: UIViewController {
     }
 
     func dequeueEmojiSectionCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.emojiSectionCellId, for: indexPath)
-        cell.selectionStyle = .none
-        cell.backgroundColor = .clear
-        if emojiSelectionView.superview != cell.contentView {
-            emojiSelectionView.removeFromSuperview()
-            cell.contentView.addSubview(emojiSelectionView)
-            NSLayoutConstraint.activate([
-                emojiSelectionView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
-                emojiSelectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                emojiSelectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                emojiSelectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor)
-            ])
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: EmojiSectionCell.reuseId, for: indexPath) as? EmojiSectionCell else {
+            fatalError("Failed to dequeue \(EmojiSectionCell.self). Check cell registration.")
         }
-        emojiSelectionView.setSelectedValue(selectedEmoji)
+        cell.configure(onEmojiSelected: { [weak self] emoji in
+            self?.selectedEmoji = emoji
+            self?.updateCreateButtonState()
+        }, selectedEmoji: selectedEmoji)
         return cell
     }
 
     func dequeueColorSectionCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.colorSectionCellId, for: indexPath)
-        cell.selectionStyle = .none
-        cell.backgroundColor = .clear
-        if colorSelectionView.superview != cell.contentView {
-            colorSelectionView.removeFromSuperview()
-            cell.contentView.addSubview(colorSelectionView)
-            NSLayoutConstraint.activate([
-                colorSelectionView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
-                colorSelectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                colorSelectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                colorSelectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor)
-            ])
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: ColorSectionCell.reuseId, for: indexPath) as? ColorSectionCell else {
+            fatalError("Failed to dequeue \(ColorSectionCell.self). Check cell registration.")
         }
-        colorSelectionView.setSelectedIndex(selectedColorIndex)
+        cell.configure(onColorSelected: { [weak self] index in
+            self?.selectedColorIndex = index
+            self?.updateCreateButtonState()
+        }, selectedColorIndex: selectedColorIndex)
         return cell
     }
 
@@ -304,9 +270,6 @@ private extension TrackerCreationViewController {
         static let emojiSectionVerticalInsetTotal: CGFloat = 48
         static let colorSectionVerticalInsetTotal: CGFloat = 48
 
-        // MARK: - Cell reuse identifiers
-        static let emojiSectionCellId = "EmojiSectionCell"
-        static let colorSectionCellId = "ColorSectionCell"
     }
 
     enum Strings {
