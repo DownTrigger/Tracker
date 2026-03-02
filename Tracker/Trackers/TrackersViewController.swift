@@ -15,7 +15,9 @@ final class TrackersViewController: UIViewController {
         var result = categories.map { category in
             TrackerCategory(
                 title: category.title,
-                trackers: category.trackers.filter { $0.schedule.contains(weekday) }
+                trackers: category.trackers.filter { tracker in
+                    tracker.schedule.compactMap(WeekDay.init(rawValue:)).contains { $0.calendarWeekdayValue == weekday }
+                }
             )
         }.filter { !$0.trackers.isEmpty }
         if !searchText.isEmpty {
