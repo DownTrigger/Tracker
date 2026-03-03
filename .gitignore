@@ -61,5 +61,6 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# Serena (AI coding assistant local data)
+# AI coding assistant local data
 .serena/
+CLAUDE.md
