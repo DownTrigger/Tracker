@@ -18,6 +18,7 @@ final class HabitCreationViewController: TrackerCreationViewController {
         let schedule = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }
         let tracker = Tracker.create(name: trimmedName, schedule: schedule, emoji: selectedEmoji, colorIndex: selectedColorIndex)
         onCreateTracker?(tracker)
+        navigationController?.dismiss(animated: true)
     }
 
     override func cellForCategoryRow(at indexPath: IndexPath) -> UITableViewCell {

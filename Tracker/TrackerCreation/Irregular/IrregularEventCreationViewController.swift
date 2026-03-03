@@ -10,6 +10,7 @@ final class IrregularEventCreationViewController: TrackerCreationViewController 
     override func performCreate() {
         let tracker = Tracker.create(name: trimmedName, schedule: WeekDay.fullWeekSchedule, emoji: selectedEmoji, colorIndex: selectedColorIndex)
         onCreateTracker?(tracker)
+        navigationController?.dismiss(animated: true)
     }
 }
 
