@@ -16,18 +16,6 @@ enum WeekDay: Int, CaseIterable {
     static let fullWeekSchedule: [Int] = allCases.map(\.rawValue)
 
     // MARK: - Computed
-    var calendarWeekdayValue: Int {
-        switch self {
-        case .sunday: return 1
-        case .monday: return 2
-        case .tuesday: return 3
-        case .wednesday: return 4
-        case .thursday: return 5
-        case .friday: return 6
-        case .saturday: return 7
-        }
-    }
-
     var shortTitle: String {
         switch self {
         case .sunday: return "Вс"
