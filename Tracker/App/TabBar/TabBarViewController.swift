@@ -29,7 +29,12 @@ final class TabBarViewController: UITabBarController {
     }
 
     private func setupViewControllers() {
-        let trackersViewController = TrackersViewController()
+        let stack = CoreDataStack.shared
+        let trackersViewController = TrackersViewController(
+            categoryStore: stack.categoryStore,
+            trackerStore: stack.trackerStore,
+            recordStore: stack.recordStore
+        )
         let trackersNavController = UINavigationController(rootViewController: trackersViewController)
         trackersViewController.view.backgroundColor = AppColors.primaryBackground
         trackersViewController.tabBarItem = UITabBarItem(
