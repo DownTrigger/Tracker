@@ -1,28 +1,32 @@
 import UIKit
 
-final class IrregularEventCreationViewController: UIViewController {
+class TrackerCreationViewController: UIViewController {
 
     // MARK: - Callbacks
     var onCreateTracker: ((Tracker) -> Void)?
 
     // MARK: - State
-    private var trackerName: String = ""
+    var trackerName: String = ""
+    var selectedEmoji: String = ""
+    var selectedColorIndex: Int = -1
     private var isShowingLimitMessage = false
 
-    private var trimmedName: String {
+    var trimmedName: String {
         trackerName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var isCreateEnabled: Bool {
-        !trimmedName.isEmpty
+    var isCreateEnabled: Bool {
+        !trimmedName.isEmpty && !selectedEmoji.isEmpty && selectedColorIndex >= 0
     }
 
-    private var shouldShowNameLimitRow: Bool {
+    var shouldShowNameLimitRow: Bool {
         trackerName.count >= TextFieldCell.maxNameLength
     }
 
+    var categoryRowCount: Int { 1 }
+
     // MARK: - UI
-    private lazy var tableView: UITableView = {
+    lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
         table.backgroundColor = AppColors.primaryBackground
         table.sectionHeaderHeight = Constants.tableSectionHeaderHeight
@@ -32,11 +36,13 @@ final class IrregularEventCreationViewController: UIViewController {
         table.register(TextFieldCell.self, forCellReuseIdentifier: TextFieldCell.reuseId)
         table.register(UITableViewCell.self, forCellReuseIdentifier: TextFieldCell.nameLimitCellReuseId)
         table.register(SubtitleCell.self, forCellReuseIdentifier: SubtitleCell.reuseId)
+        table.register(EmojiSectionCell.self, forCellReuseIdentifier: EmojiSectionCell.reuseId)
+        table.register(ColorSectionCell.self, forCellReuseIdentifier: ColorSectionCell.reuseId)
         table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
 
-    private lazy var cancelButton: UIButton = {
+    lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(Strings.cancel, for: .normal)
         button.setTitleColor(AppColors.accentRed, for: .normal)
@@ -50,7 +56,7 @@ final class IrregularEventCreationViewController: UIViewController {
         return button
     }()
 
-    private lazy var createButton: UIButton = {
+    lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(Strings.create, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
@@ -80,15 +86,15 @@ final class IrregularEventCreationViewController: UIViewController {
 
     // MARK: - Setup
     private func setupUI() {
-        title = Strings.screenTitle
+        title = screenTitle
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         additionalSafeAreaInsets = Constants.additionalSafeAreaInsets
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(tableView)
         view.addSubview(buttonStack)
         buttonStack.addArrangedSubview(cancelButton)
@@ -108,27 +114,30 @@ final class IrregularEventCreationViewController: UIViewController {
         ])
     }
 
+    var screenTitle: String { "" }
+
     // MARK: - Actions
     @objc private func cancelTapped() {
         dismiss(animated: true)
     }
 
     @objc private func createTapped() {
-        guard !trimmedName.isEmpty else { return }
-        let tracker = Tracker.create(name: trimmedName, schedule: WeekDay.fullWeekSchedule)
-        onCreateTracker?(tracker)
+        guard isCreateEnabled else { return }
+        performCreate()
     }
 
+    func performCreate() {}
+
     // MARK: - State Updates
-    private func updateCreateButtonState() {
+    func updateCreateButtonState() {
         createButton.isEnabled = isCreateEnabled
         createButton.backgroundColor = isCreateEnabled ? AppColors.primaryLabel : AppColors.accentGray
     }
 
-    private func updateNameLimitRowIfNeeded() {
+    func updateNameLimitRowIfNeeded() {
         guard shouldShowNameLimitRow != isShowingLimitMessage else { return }
         isShowingLimitMessage = shouldShowNameLimitRow
-        let indexPath = IndexPath(row: Row.nameLimitWarning.rawValue, section: Section.name.rawValue)
+        let indexPath = IndexPath(row: NameRow.nameLimitWarning.rawValue, section: Section.name.rawValue)
         tableView.performBatchUpdates {
             if shouldShowNameLimitRow {
                 tableView.insertRows(at: [indexPath], with: .fade)
@@ -136,20 +145,20 @@ final class IrregularEventCreationViewController: UIViewController {
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
-        let nameCellIndexPath = IndexPath(row: Row.textField.rawValue, section: Section.name.rawValue)
+        let nameCellIndexPath = IndexPath(row: NameRow.textField.rawValue, section: Section.name.rawValue)
         if let nameCell = tableView.cellForRow(at: nameCellIndexPath) {
             nameCell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
         }
     }
 
     // MARK: - Cell Configuration
-    private func handleNameChange(_ text: String?) {
+    func handleNameChange(_ text: String?) {
         trackerName = text ?? ""
         updateNameLimitRowIfNeeded()
         updateCreateButtonState()
     }
 
-    private func dequeueNameCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeueNameCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TextFieldCell.reuseId, for: indexPath) as? TextFieldCell else {
             fatalError("Failed to dequeue \(TextFieldCell.self). Check cell registration.")
         }
@@ -158,7 +167,7 @@ final class IrregularEventCreationViewController: UIViewController {
         return cell
     }
 
-    private func dequeueCategoryCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeueCategoryCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: SubtitleCell.reuseId, for: indexPath) as? SubtitleCell else {
             fatalError("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
         }
@@ -167,7 +176,7 @@ final class IrregularEventCreationViewController: UIViewController {
         return cell
     }
 
-    private func dequeueNameLimitCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeueNameLimitCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: TextFieldCell.nameLimitCellReuseId, for: indexPath)
         cell.textLabel?.text = TextFieldCell.nameLimitFooterText
         cell.textLabel?.font = .systemFont(ofSize: Constants.warningLabelFontSize)
@@ -177,11 +186,108 @@ final class IrregularEventCreationViewController: UIViewController {
         cell.backgroundColor = .clear
         return cell
     }
+
+    func dequeueEmojiSectionCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: EmojiSectionCell.reuseId, for: indexPath) as? EmojiSectionCell else {
+            fatalError("Failed to dequeue \(EmojiSectionCell.self). Check cell registration.")
+        }
+        cell.configure(onEmojiSelected: { [weak self] emoji in
+            self?.selectedEmoji = emoji
+            self?.updateCreateButtonState()
+        }, selectedEmoji: selectedEmoji)
+        return cell
+    }
+
+    func dequeueColorSectionCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: ColorSectionCell.reuseId, for: indexPath) as? ColorSectionCell else {
+            fatalError("Failed to dequeue \(ColorSectionCell.self). Check cell registration.")
+        }
+        cell.configure(onColorSelected: { [weak self] index in
+            self?.selectedColorIndex = index
+            self?.updateCreateButtonState()
+        }, selectedColorIndex: selectedColorIndex)
+        return cell
+    }
+
+    func cellForCategoryRow(at indexPath: IndexPath) -> UITableViewCell {
+        dequeueCategoryCell(in: tableView, at: indexPath)
+    }
+    
+    var emojiToColorSectionSpacing: CGFloat { 0 }
+}
+
+// MARK: - Section & Rows
+extension TrackerCreationViewController {
+    enum Section: Int, CaseIterable {
+        case name = 0
+        case category = 1
+        case emoji = 2
+        case color = 3
+    }
+
+    enum NameRow: Int, CaseIterable {
+        case textField = 0
+        case nameLimitWarning = 1
+    }
+}
+
+// MARK: - Constants
+private extension TrackerCreationViewController {
+    enum Constants {
+        // MARK: - Table
+        static let tableSectionHeaderHeight: CGFloat = 12
+        static let tableSectionFooterHeight: CGFloat = 12
+        static let categorySectionFooterHeight: CGFloat = 38
+
+        // MARK: - Buttons
+        static let buttonFontSize: CGFloat = 16
+        static let buttonCornerRadius: CGFloat = 16
+        static let buttonHeight: CGFloat = 60
+        static let buttonStackSpacing: CGFloat = 8
+        static let cancelButtonBorderWidth: CGFloat = 1
+        static let horizontalPadding: CGFloat = 20
+        static let bottomPadding: CGFloat = 16
+        
+        static let tableViewBottomPadding: CGFloat = 16
+
+        // MARK: - View
+        static let additionalSafeAreaInsets = UIEdgeInsets(top: -10, left: 0, bottom: 0, right: 0)
+
+        // MARK: - Rows & cells
+        static let standardRowHeight: CGFloat = 75
+        static let nameLimitRowHeight: CGFloat = 38
+        static let cellCornerRadius: CGFloat = 10
+        static let warningLabelFontSize: CGFloat = 17
+        static let hiddenSeparatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        static let defaultSeparatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
+
+        // MARK: - Section headers
+        static let sectionHeaderLeading: CGFloat = 12
+        static let sectionHeaderHeight: CGFloat = 0
+        static let sectionHeaderLabelBottom: CGFloat = 0
+
+        // MARK: - Emoji & color sections
+        static let emojiSectionVerticalInsetTotal: CGFloat = 48
+        static let colorSectionVerticalInsetTotal: CGFloat = 48
+
+    }
+
+    enum Strings {
+        // MARK: - Buttons
+        static let cancel = "Отменить"
+        static let create = "Создать"
+
+        // MARK: - Labels & placeholders
+        static let namePlaceholder = "Введите название трекера"
+        static let categoryTitle = "Категория"
+        static let defaultCategoryName = "Важное"
+        static let emojiSectionTitle = "Emoji"
+        static let colorSectionTitle = "Цвет"
+    }
 }
 
 // MARK: - UITableViewDataSource
-extension IrregularEventCreationViewController: UITableViewDataSource {
-
+extension TrackerCreationViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         Section.allCases.count
     }
@@ -190,8 +296,10 @@ extension IrregularEventCreationViewController: UITableViewDataSource {
         guard let sectionKind = Section(rawValue: section) else { return 0 }
         switch sectionKind {
         case .name:
-            return shouldShowNameLimitRow ? Row.allCases.count : 1
+            return shouldShowNameLimitRow ? NameRow.allCases.count : 1
         case .category:
+            return categoryRowCount
+        case .emoji, .color:
             return 1
         }
     }
@@ -202,7 +310,7 @@ extension IrregularEventCreationViewController: UITableViewDataSource {
         }
         switch section {
         case .name:
-            guard let row = Row(rawValue: indexPath.row) else {
+            guard let row = NameRow(rawValue: indexPath.row) else {
                 fatalError("Unexpected row in name section: \(indexPath.row)")
             }
             switch row {
@@ -212,27 +320,84 @@ extension IrregularEventCreationViewController: UITableViewDataSource {
                 return dequeueNameLimitCell(in: tableView, at: indexPath)
             }
         case .category:
-            return dequeueCategoryCell(in: tableView, at: indexPath)
+            return cellForCategoryRow(at: indexPath)
+        case .emoji:
+            return dequeueEmojiSectionCell(in: tableView, at: indexPath)
+        case .color:
+            return dequeueColorSectionCell(in: tableView, at: indexPath)
         }
     }
 }
 
 // MARK: - UITableViewDelegate
-extension IrregularEventCreationViewController: UITableViewDelegate {
-
+extension TrackerCreationViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if Section(rawValue: indexPath.section) == .name,
-           Row(rawValue: indexPath.row) == .nameLimitWarning {
+           NameRow(rawValue: indexPath.row) == .nameLimitWarning {
             return Constants.nameLimitRowHeight
+        }
+        if Section(rawValue: indexPath.section) == .emoji {
+            let width = tableView.bounds.width
+            return EmojiSelectionView.preferredContentHeight(forWidth: width) + Constants.emojiSectionVerticalInsetTotal
+        }
+        if Section(rawValue: indexPath.section) == .color {
+            let width = tableView.bounds.width
+            return ColorSelectionView.preferredContentHeight(forWidth: width) + Constants.colorSectionVerticalInsetTotal
         }
         return Constants.standardRowHeight
     }
 
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        guard let sectionKind = Section(rawValue: section) else { return nil }
+        let title: String?
+        switch sectionKind {
+        case .emoji: title = Strings.emojiSectionTitle
+        case .color: title = Strings.colorSectionTitle
+        default: return nil
+        }
+        guard let text = title else { return nil }
+        let label = UILabel()
+        label.text = text
+        label.font = .systemFont(ofSize: 19, weight: .bold)
+        label.textColor = AppColors.primaryLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        let container = UIView()
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: Constants.sectionHeaderLeading),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -Constants.sectionHeaderLabelBottom)
+        ])
+        return container
+    }
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        guard let sectionKind = Section(rawValue: section) else { return Constants.tableSectionFooterHeight }
+        switch sectionKind {
+        case .category: return Constants.categorySectionFooterHeight
+        case .emoji: return emojiToColorSectionSpacing
+        default: return Constants.tableSectionFooterHeight
+        }
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        guard let sectionKind = Section(rawValue: section) else { return 0 }
+        switch sectionKind {
+        case .emoji, .color: return Constants.sectionHeaderHeight
+        default: return 0
+        }
+    }
+
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if Section(rawValue: indexPath.section) == .emoji || Section(rawValue: indexPath.section) == .color {
+            cell.contentView.backgroundColor = .clear
+            cell.contentView.layer.cornerRadius = Constants.cellCornerRadius
+            cell.contentView.layer.masksToBounds = true
+            return
+        }
         guard Section(rawValue: indexPath.section) == .name else { return }
         cell.backgroundColor = .clear
         let rowCount = tableView.numberOfRows(inSection: indexPath.section)
-        if Row(rawValue: indexPath.row) == .textField {
+        if NameRow(rawValue: indexPath.row) == .textField {
             applyNameCellStyle(cell, rowCount: rowCount)
         } else {
             applyWarningCellStyle(cell)
@@ -260,52 +425,5 @@ extension IrregularEventCreationViewController: UITableViewDelegate {
         cell.contentView.layer.maskedCorners = []
         cell.contentView.layer.masksToBounds = false
         cell.separatorInset = Constants.hiddenSeparatorInset
-    }
-}
-
-// MARK: - Section & Row
-private extension IrregularEventCreationViewController {
-
-    enum Section: Int, CaseIterable {
-        case name = 0
-        case category = 1
-    }
-
-    enum Row: Int, CaseIterable {
-        case textField = 0
-        case nameLimitWarning = 1
-    }
-}
-
-// MARK: - Constants
-private extension IrregularEventCreationViewController {
-
-    enum Constants {
-        static let tableSectionHeaderHeight: CGFloat = 12
-        static let tableSectionFooterHeight: CGFloat = 12
-        static let buttonFontSize: CGFloat = 16
-        static let buttonCornerRadius: CGFloat = 16
-        static let buttonHeight: CGFloat = 60
-        static let buttonStackSpacing: CGFloat = 8
-        static let cancelButtonBorderWidth: CGFloat = 1
-        static let horizontalPadding: CGFloat = 20
-        static let bottomPadding: CGFloat = 16
-        static let tableViewBottomPadding: CGFloat = 24
-        static let additionalSafeAreaInsets = UIEdgeInsets(top: -10, left: 0, bottom: 0, right: 0)
-        static let standardRowHeight: CGFloat = 75
-        static let nameLimitRowHeight: CGFloat = 38
-        static let cellCornerRadius: CGFloat = 10
-        static let warningLabelFontSize: CGFloat = 17
-        static let hiddenSeparatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        static let defaultSeparatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
-    }
-
-    enum Strings {
-        static let screenTitle = "Новое нерегулярное событие"
-        static let cancel = "Отменить"
-        static let create = "Создать"
-        static let namePlaceholder = "Введите название трекера"
-        static let categoryTitle = "Категория"
-        static let defaultCategoryName = "Важное"
     }
 }

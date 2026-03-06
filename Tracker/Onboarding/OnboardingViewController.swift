@@ -65,12 +65,12 @@ final class OnboardingViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = AppColors.primaryBackground
         addChild(pageViewController)
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         pageViewController.didMove(toParent: self)
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(pageViewController.view)
         view.addSubview(pageControl)
         view.addSubview(primaryButton)
@@ -153,13 +153,18 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 // MARK: - Constants
 private extension OnboardingViewController {
     enum Constants {
+        // MARK: - State
         static let onboardingCompletedKey = "onboardingCompleted"
         static let pagesCount = 2
+
+        // MARK: - Buttons
         static let buttonFontSize: CGFloat = 16
         static let buttonCornerRadius: CGFloat = 16
         static let buttonHeight: CGFloat = 60
         static let horizontalPadding: CGFloat = 20
         static let buttonBottomPadding: CGFloat = 50
+
+        // MARK: - Page control
         static let pageControlSpacing: CGFloat = 24
         static let pageControlInactiveAlpha: CGFloat = 0.3
     }

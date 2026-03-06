@@ -43,11 +43,11 @@ final class ScheduleViewController: UIViewController {
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         additionalSafeAreaInsets = Constants.additionalSafeAreaInsets
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(tableView)
         view.addSubview(doneButton)
     }
@@ -106,12 +106,17 @@ extension ScheduleViewController: UITableViewDelegate {
 // MARK: - Constants
 private extension ScheduleViewController {
     enum Constants {
+        // MARK: - Table
         static let rowHeight: CGFloat = 75
+
+        // MARK: - Buttons
         static let buttonFontSize: CGFloat = 16
         static let buttonCornerRadius: CGFloat = 16
         static let buttonHeight: CGFloat = 60
         static let horizontalPadding: CGFloat = 20
         static let bottomPadding: CGFloat = 16
+
+        // MARK: - View
         static let additionalSafeAreaInsets = UIEdgeInsets(top: -10, left: 0, bottom: 0, right: 0)
     }
 
