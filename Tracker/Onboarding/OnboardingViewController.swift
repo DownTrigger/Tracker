@@ -65,12 +65,12 @@ final class OnboardingViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = AppColors.primaryBackground
         addChild(pageViewController)
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         pageViewController.didMove(toParent: self)
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(pageViewController.view)
         view.addSubview(pageControl)
         view.addSubview(primaryButton)

@@ -1,8 +1,11 @@
 import CoreData
 
 final class TrackerCategoryStore: NSObject {
+
+    // MARK: - Public Properties
     var onChange: (() -> Void)?
 
+    // MARK: - Private Properties
     private let context: NSManagedObjectContext
 
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCD> = {
@@ -18,6 +21,12 @@ final class TrackerCategoryStore: NSObject {
         return frc
     }()
 
+    // MARK: - Computed Properties
+    var categories: [TrackerCategory] {
+        (fetchedResultsController.fetchedObjects ?? []).compactMap { makeCategory(from: $0) }
+    }
+
+    // MARK: - Init
     init(context: NSManagedObjectContext) {
         self.context = context
         super.init()
@@ -28,10 +37,7 @@ final class TrackerCategoryStore: NSObject {
         }
     }
 
-    var categories: [TrackerCategory] {
-        (fetchedResultsController.fetchedObjects ?? []).compactMap { makeCategory(from: $0) }
-    }
-
+    // MARK: - Private Methods
     private func makeCategory(from object: TrackerCategoryCD) -> TrackerCategory? {
         guard let title = object.title else { return nil }
         let trackers = (object.trackers as? Set<TrackerCD>)?.compactMap { $0.toTracker() } ?? []

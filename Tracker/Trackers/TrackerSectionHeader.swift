@@ -17,12 +17,12 @@ final class TrackerSectionHeader: UICollectionReusableView {
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
     }
 
     // MARK: - Setup
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         addSubview(titleLabel)
     }
 

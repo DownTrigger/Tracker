@@ -85,7 +85,7 @@ class TrackerCreationViewController: UIViewController {
     }
 
     // MARK: - Setup
-    func setupUI() {
+    private func setupUI() {
         title = screenTitle
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
@@ -94,14 +94,14 @@ class TrackerCreationViewController: UIViewController {
         setupConstraints()
     }
 
-    func setupViewHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(tableView)
         view.addSubview(buttonStack)
         buttonStack.addArrangedSubview(cancelButton)
         buttonStack.addArrangedSubview(createButton)
     }
 
-    func setupConstraints() {
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -117,11 +117,11 @@ class TrackerCreationViewController: UIViewController {
     var screenTitle: String { "" }
 
     // MARK: - Actions
-    @objc func cancelTapped() {
+    @objc private func cancelTapped() {
         dismiss(animated: true)
     }
 
-    @objc func createTapped() {
+    @objc private func createTapped() {
         guard isCreateEnabled else { return }
         performCreate()
     }
@@ -408,7 +408,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-    func applyNameCellStyle(_ cell: UITableViewCell, rowCount: Int) {
+    private func applyNameCellStyle(_ cell: UITableViewCell, rowCount: Int) {
         cell.contentView.backgroundColor = AppColors.secondaryBackground
         cell.contentView.layer.cornerRadius = Constants.cellCornerRadius
         cell.contentView.layer.masksToBounds = true
@@ -419,7 +419,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
         cell.separatorInset = rowCount > 1 ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
     }
 
-    func applyWarningCellStyle(_ cell: UITableViewCell) {
+    private func applyWarningCellStyle(_ cell: UITableViewCell) {
         cell.contentView.backgroundColor = .clear
         cell.contentView.layer.cornerRadius = 0
         cell.contentView.layer.maskedCorners = []

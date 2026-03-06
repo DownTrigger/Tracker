@@ -1,12 +1,16 @@
 import CoreData
 
 final class TrackerStore {
+
+    // MARK: - Private Properties
     private let context: NSManagedObjectContext
 
+    // MARK: - Init
     init(context: NSManagedObjectContext) {
         self.context = context
     }
 
+    // MARK: - Public Methods
     func addTracker(_ tracker: Tracker, toCategoryWithTitle title: String) throws {
         let category = findOrCreateCategory(title: title)
         let object = TrackerCD(context: context)
@@ -19,6 +23,7 @@ final class TrackerStore {
         try context.save()
     }
 
+    // MARK: - Private Methods
     private func findOrCreateCategory(title: String) -> TrackerCategoryCD {
         let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
         request.predicate = NSPredicate(format: "title == %@", title)

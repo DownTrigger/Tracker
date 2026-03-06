@@ -9,11 +9,11 @@ final class HabitCreationViewController: TrackerCreationViewController {
         super.isCreateEnabled && !selectedWeekdays.isEmpty
     }
 
-    // MARK: - Overrides
     override var screenTitle: String { Self.Strings.screenTitle }
 
     override var categoryRowCount: Int { 2 }
 
+    // MARK: - Actions
     override func performCreate() {
         let schedule = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }
         let tracker = Tracker.create(name: trimmedName, schedule: schedule, emoji: selectedEmoji, colorIndex: selectedColorIndex)

@@ -43,11 +43,11 @@ final class ScheduleViewController: UIViewController {
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         additionalSafeAreaInsets = Constants.additionalSafeAreaInsets
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(tableView)
         view.addSubview(doneButton)
     }

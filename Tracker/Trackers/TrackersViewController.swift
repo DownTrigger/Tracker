@@ -10,30 +10,11 @@ final class TrackersViewController: UIViewController {
     // MARK: - Data
     private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
-    var currentDate: Date = Date()
+    private var currentDate: Date = Date()
     private var searchText: String = ""
     private var completedTrackerIdsForSelectedDate: Set<UUID> = []
 
     private var displayedCategories: [TrackerCategory] = []
-
-    private func rebuildDisplayedCategories() {
-        let weekday = Calendar.current.component(.weekday, from: currentDate)
-        var result = categories.map { category in
-            TrackerCategory(
-                title: category.title,
-                trackers: category.trackers.filter { $0.schedule.contains(weekday) }
-            )
-        }.filter { !$0.trackers.isEmpty }
-        if !searchText.isEmpty {
-            result = result.map { category in
-                TrackerCategory(
-                    title: category.title,
-                    trackers: category.trackers.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-                )
-            }.filter { !$0.trackers.isEmpty }
-        }
-        displayedCategories = result
-    }
 
     // MARK: - UI
     private lazy var searchController: UISearchController = {
@@ -141,12 +122,12 @@ final class TrackersViewController: UIViewController {
     }
 
     private func setupUI() {
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
         updateEmptyStateVisibility()
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(collectionView)
         view.addSubview(emptyStateImageView)
         view.addSubview(emptyStateLabel)
@@ -195,6 +176,25 @@ final class TrackersViewController: UIViewController {
     }
 
     // MARK: - Helpers
+    private func rebuildDisplayedCategories() {
+        let weekday = Calendar.current.component(.weekday, from: currentDate)
+        var result = categories.map { category in
+            TrackerCategory(
+                title: category.title,
+                trackers: category.trackers.filter { $0.schedule.contains(weekday) }
+            )
+        }.filter { !$0.trackers.isEmpty }
+        if !searchText.isEmpty {
+            result = result.map { category in
+                TrackerCategory(
+                    title: category.title,
+                    trackers: category.trackers.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+                )
+            }.filter { !$0.trackers.isEmpty }
+        }
+        displayedCategories = result
+    }
+
     private func updateEmptyStateVisibility() {
         let hasTrackersToShow = displayedCategories.contains { !$0.trackers.isEmpty }
         emptyStateImageView.isHidden = hasTrackersToShow
@@ -223,12 +223,12 @@ final class TrackersViewController: UIViewController {
         )
     }
 
-    // MARK: - Data mutations
-    func completeTracker(id: UUID, date: Date) {
+    // MARK: - Actions
+    private func completeTracker(id: UUID, date: Date) {
         recordStore.addRecord(TrackerRecord(trackerId: id, date: date))
     }
 
-    func uncompleteTracker(id: UUID, date: Date) {
+    private func uncompleteTracker(id: UUID, date: Date) {
         recordStore.deleteRecord(trackerId: id, date: date)
     }
 
@@ -240,7 +240,7 @@ final class TrackersViewController: UIViewController {
         }
     }
 
-    // MARK: - Actions
+
     @objc private func addTrackerTapped() {
         let typeSelectionVC = TrackerTypeSelectionViewController()
         typeSelectionVC.onCreateTracker = { [weak self] tracker in

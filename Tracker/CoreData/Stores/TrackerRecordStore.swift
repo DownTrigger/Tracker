@@ -1,8 +1,11 @@
 import CoreData
 
 final class TrackerRecordStore: NSObject {
+
+    // MARK: - Public Properties
     var onChange: (() -> Void)?
 
+    // MARK: - Private Properties
     private let context: NSManagedObjectContext
 
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerRecordCD> = {
@@ -18,6 +21,12 @@ final class TrackerRecordStore: NSObject {
         return frc
     }()
 
+    // MARK: - Computed Properties
+    var records: [TrackerRecord] {
+        (fetchedResultsController.fetchedObjects ?? []).compactMap { makeRecord(from: $0) }
+    }
+
+    // MARK: - Init
     init(context: NSManagedObjectContext) {
         self.context = context
         super.init()
@@ -28,16 +37,17 @@ final class TrackerRecordStore: NSObject {
         }
     }
 
-    var records: [TrackerRecord] {
-        (fetchedResultsController.fetchedObjects ?? []).compactMap { makeRecord(from: $0) }
-    }
-
+    // MARK: - Public Methods
     func addRecord(_ record: TrackerRecord) {
         let object = TrackerRecordCD(context: context)
         object.id = UUID()
         object.trackerId = record.trackerId
         object.date = record.date
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("TrackerRecordStore: addRecord save failed: \(error)")
+        }
     }
 
     func deleteRecord(trackerId: UUID, date: Date) {
@@ -47,9 +57,14 @@ final class TrackerRecordStore: NSObject {
         ((try? context.fetch(request)) ?? [])
             .filter { calendar.isDate($0.date ?? .distantPast, inSameDayAs: date) }
             .forEach { context.delete($0) }
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("TrackerRecordStore: deleteRecord save failed: \(error)")
+        }
     }
 
+    // MARK: - Private Methods
     private func makeRecord(from object: TrackerRecordCD) -> TrackerRecord? {
         guard let trackerId = object.trackerId, let date = object.date else { return nil }
         return TrackerRecord(trackerId: trackerId, date: date)

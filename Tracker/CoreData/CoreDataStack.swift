@@ -1,10 +1,12 @@
 import CoreData
 
 final class CoreDataStack {
-    
+
+    // MARK: - Singleton
     static let shared = CoreDataStack()
     private init() { }
-    
+
+    // MARK: - Core Data Stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Model")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
@@ -14,15 +16,17 @@ final class CoreDataStack {
         })
         return container
     }()
-    
+
     var context: NSManagedObjectContext {
         persistentContainer.viewContext
     }
 
+    // MARK: - Stores
     lazy var trackerStore = TrackerStore(context: context)
     lazy var categoryStore = TrackerCategoryStore(context: context)
     lazy var recordStore = TrackerRecordStore(context: context)
 
+    // MARK: - Save
     func saveContext() {
         guard context.hasChanges else { return }
         do {

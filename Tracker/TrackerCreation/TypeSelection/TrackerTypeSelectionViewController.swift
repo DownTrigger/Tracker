@@ -48,11 +48,11 @@ final class TrackerTypeSelectionViewController: UIViewController {
     private func setupUI() {
         title = Strings.screenTitle
         view.backgroundColor = AppColors.primaryBackground
-        setupHierarchy()
+        setupViewHierarchy()
         setupConstraints()
     }
 
-    private func setupHierarchy() {
+    private func setupViewHierarchy() {
         view.addSubview(stackView)
         stackView.addArrangedSubview(habitButton)
         stackView.addArrangedSubview(irregularEventButton)
