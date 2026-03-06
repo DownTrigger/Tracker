@@ -64,3 +64,4 @@ fastlane/test_output
 # AI coding assistant local data
 .serena/
 CLAUDE.md
+.claude/
