@@ -2,19 +2,8 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
 
-    // MARK: - Stores
-    private let categoryStore: TrackerCategoryStore
-    private let trackerStore: TrackerStore
-    private let recordStore: TrackerRecordStore
-
-    // MARK: - Data
-    private var categories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = []
-    private var currentDate: Date = Date()
-    private var searchText: String = ""
-    private var completedTrackerIdsForSelectedDate: Set<UUID> = []
-
-    private var displayedCategories: [TrackerCategory] = []
+    // MARK: - ViewModel
+    private let viewModel: TrackersViewModel
 
     // MARK: - UI
     private lazy var searchController: UISearchController = {
@@ -64,10 +53,8 @@ final class TrackersViewController: UIViewController {
     }()
 
     // MARK: - Init
-    init(categoryStore: TrackerCategoryStore, trackerStore: TrackerStore, recordStore: TrackerRecordStore) {
-        self.categoryStore = categoryStore
-        self.trackerStore = trackerStore
-        self.recordStore = recordStore
+    init(viewModel: TrackersViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -78,26 +65,10 @@ final class TrackersViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentDate = customDatePicker.date
-        categories = categoryStore.categories
-        completedTrackers = recordStore.records
-        rebuildDisplayedCategories()
-        rebuildCompletedIdsForSelectedDate()
         setupNavigationBar()
         setupUI()
         setupButtonActions()
-        setupStoreObservers()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        setupStoreObservers()
-        categories = categoryStore.categories
-        completedTrackers = recordStore.records
-        rebuildDisplayedCategories()
-        rebuildCompletedIdsForSelectedDate()
-        collectionView.reloadData()
-        updateEmptyStateVisibility()
+        bindViewModel()
     }
 
     // MARK: - Setup
@@ -165,97 +136,29 @@ final class TrackersViewController: UIViewController {
 
     private func setupButtonActions() {
         customDatePicker.onDateChanged = { [weak self] date in
-            self?.datePickerValueChanged(date)
+            self?.viewModel.setDate(date)
         }
     }
 
-    private func setupStoreObservers() {
-        categoryStore.onChange = { [weak self] in
-            guard let self else { return }
-            self.categories = self.categoryStore.categories
-            self.rebuildDisplayedCategories()
-            self.rebuildCompletedIdsForSelectedDate()
-            self.collectionView.reloadData()
-            self.updateEmptyStateVisibility()
-        }
-        recordStore.onChange = { [weak self] in
-            guard let self else { return }
-            self.completedTrackers = self.recordStore.records
-            self.rebuildCompletedIdsForSelectedDate()
-            self.collectionView.reloadData()
+    private func bindViewModel() {
+        viewModel.onDataUpdated = { [weak self] in
+            self?.collectionView.reloadData()
+            self?.updateEmptyStateVisibility()
         }
     }
 
     // MARK: - Helpers
-    private func rebuildDisplayedCategories() {
-        let weekday = Calendar.current.component(.weekday, from: currentDate)
-        var result = categories.map { category in
-            TrackerCategory(
-                title: category.title,
-                trackers: category.trackers.filter { $0.schedule.contains(weekday) }
-            )
-        }.filter { !$0.trackers.isEmpty }
-        if !searchText.isEmpty {
-            result = result.map { category in
-                TrackerCategory(
-                    title: category.title,
-                    trackers: category.trackers.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-                )
-            }.filter { !$0.trackers.isEmpty }
-        }
-        displayedCategories = result
-    }
-
     private func updateEmptyStateVisibility() {
-        let hasTrackersToShow = displayedCategories.contains { !$0.trackers.isEmpty }
+        let hasTrackersToShow = viewModel.displayedCategories.contains { !$0.trackers.isEmpty }
         emptyStateImageView.isHidden = hasTrackersToShow
         emptyStateLabel.isHidden = hasTrackersToShow
         collectionView.isHidden = !hasTrackersToShow
     }
 
-    private func isFutureDate(_ date: Date) -> Bool {
-        Calendar.current.compare(date, to: Date(), toGranularity: .day) == .orderedDescending
-    }
-
-    private func completedDaysCount(for trackerId: UUID) -> Int {
-        completedTrackers.filter { $0.trackerId == trackerId }.count
-    }
-
-    private func isCompletedToday(trackerId: UUID) -> Bool {
-        completedTrackerIdsForSelectedDate.contains(trackerId)
-    }
-
-    private func rebuildCompletedIdsForSelectedDate() {
-        let calendar = Calendar.current
-        completedTrackerIdsForSelectedDate = Set(
-            completedTrackers
-                .filter { calendar.isDate($0.date, inSameDayAs: currentDate) }
-                .map(\.trackerId)
-        )
-    }
-
     // MARK: - Actions
-    private func completeTracker(id: UUID, date: Date) {
-        recordStore.addRecord(TrackerRecord(trackerId: id, date: date))
-    }
-
-    private func uncompleteTracker(id: UUID, date: Date) {
-        recordStore.deleteRecord(trackerId: id, date: date)
-    }
-
     private func addTracker(_ tracker: Tracker, toCategoryWithTitle title: String) {
-        do {
-            try trackerStore.addTracker(tracker, toCategoryWithTitle: title)
-            categories = categoryStore.categories
-            rebuildDisplayedCategories()
-            rebuildCompletedIdsForSelectedDate()
-            collectionView.reloadData()
-            updateEmptyStateVisibility()
-        } catch {
-            assertionFailure("Failed to add tracker: \(error)")
-        }
+        viewModel.addTracker(tracker, categoryName: title)
     }
-
 
     @objc private func addTrackerTapped() {
         let typeSelectionVC = TrackerTypeSelectionViewController()
@@ -265,34 +168,26 @@ final class TrackersViewController: UIViewController {
         let nav = UINavigationController(rootViewController: typeSelectionVC)
         present(nav, animated: true)
     }
-
-    private func datePickerValueChanged(_ date: Date) {
-        currentDate = date
-        rebuildDisplayedCategories()
-        rebuildCompletedIdsForSelectedDate()
-        collectionView.reloadData()
-        updateEmptyStateVisibility()
-    }
 }
 
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        displayedCategories.count
+        viewModel.displayedCategories.count
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        displayedCategories[section].trackers.count
+        viewModel.displayedCategories[section].trackers.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.reuseId, for: indexPath) as? TrackerCell else {
             fatalError("Failed to dequeue \(TrackerCell.self). Check cell registration.")
         }
-        let tracker = displayedCategories[indexPath.section].trackers[indexPath.item]
-        let days = completedDaysCount(for: tracker.id)
-        let isCompleted = isCompletedToday(trackerId: tracker.id)
-        let canComplete = !isFutureDate(currentDate)
+        let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
+        let days = viewModel.completedDaysCount(for: tracker.id)
+        let isCompleted = viewModel.isCompletedToday(trackerId: tracker.id)
+        let canComplete = viewModel.canComplete(for: customDatePicker.date)
 
         cell.configure(viewModel: .init(
             name: tracker.name,
@@ -305,14 +200,8 @@ extension TrackersViewController: UICollectionViewDataSource {
 
         cell.onCompleteTapped = { [weak self] in
             guard let self else { return }
-            let date = self.currentDate
-            guard !self.isFutureDate(date) else { return }
-            if self.isCompletedToday(trackerId: tracker.id) {
-                self.uncompleteTracker(id: tracker.id, date: date)
-            } else {
-                self.completeTracker(id: tracker.id, date: date)
-            }
-            collectionView.reloadItems(at: [indexPath])
+            guard self.viewModel.canComplete(for: self.customDatePicker.date) else { return }
+            self.viewModel.toggleCompletion(trackerId: tracker.id)
         }
         return cell
     }
@@ -332,23 +221,21 @@ extension TrackersViewController: UICollectionViewDataSource {
         ) as? TrackerSectionHeader else {
             fatalError("Failed to dequeue \(TrackerSectionHeader.self). Check supplementary view registration.")
         }
-        header.configure(title: displayedCategories[indexPath.section].title)
+        header.configure(title: viewModel.displayedCategories[indexPath.section].title)
         return header
     }
 }
 
 // MARK: - UICollectionViewDelegate
 extension TrackersViewController: UICollectionViewDelegate {
-    // TODO: No methods needed yet. 
+    // TODO: No methods needed yet.
 }
 
 // MARK: - UISearchResultsUpdating
 extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        searchText = (searchController.searchBar.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        rebuildDisplayedCategories()
-        collectionView.reloadData()
-        updateEmptyStateVisibility()
+        let text = (searchController.searchBar.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.setSearchText(text)
     }
 }
 
