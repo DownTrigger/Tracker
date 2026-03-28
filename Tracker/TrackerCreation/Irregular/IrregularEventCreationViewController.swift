@@ -9,7 +9,7 @@ final class IrregularEventCreationViewController: TrackerCreationViewController 
 
     override func performCreate() {
         let tracker = Tracker.create(name: trimmedName, schedule: WeekDay.fullWeekSchedule, emoji: selectedEmoji, colorIndex: selectedColorIndex)
-        onCreateTracker?(tracker)
+        onCreateTracker?(tracker, selectedCategoryTitle ?? Strings.defaultCategoryName)
         navigationController?.dismiss(animated: true)
     }
 }
@@ -18,5 +18,6 @@ final class IrregularEventCreationViewController: TrackerCreationViewController 
 private extension IrregularEventCreationViewController {
     enum Strings {
         static let screenTitle = "Новое нерегулярное событие"
+        static let defaultCategoryName = "Важное"
     }
 }

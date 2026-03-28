@@ -3,7 +3,7 @@ import UIKit
 final class TrackerTypeSelectionViewController: UIViewController {
 
     // MARK: - Callbacks
-    var onCreateTracker: ((Tracker) -> Void)?
+    var onCreateTracker: ((Tracker, String) -> Void)?
 
     // MARK: - UI
     private lazy var habitButton: UIButton = {
@@ -71,16 +71,16 @@ final class TrackerTypeSelectionViewController: UIViewController {
     // MARK: - Actions
     @objc private func habitTapped() {
         let vc = HabitCreationViewController()
-        vc.onCreateTracker = { [weak self] tracker in
-            self?.onCreateTracker?(tracker)
+        vc.onCreateTracker = { [weak self] tracker, categoryName in
+            self?.onCreateTracker?(tracker, categoryName)
         }
         navigationController?.pushViewController(vc, animated: true)
     }
 
     @objc private func irregularEventTapped() {
         let vc = IrregularEventCreationViewController()
-        vc.onCreateTracker = { [weak self] tracker in
-            self?.onCreateTracker?(tracker)
+        vc.onCreateTracker = { [weak self] tracker, categoryName in
+            self?.onCreateTracker?(tracker, categoryName)
         }
         navigationController?.pushViewController(vc, animated: true)
     }

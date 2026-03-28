@@ -3,12 +3,13 @@ import UIKit
 class TrackerCreationViewController: UIViewController {
 
     // MARK: - Callbacks
-    var onCreateTracker: ((Tracker) -> Void)?
+    var onCreateTracker: ((Tracker, String) -> Void)?
 
     // MARK: - State
     var trackerName: String = ""
     var selectedEmoji: String = ""
     var selectedColorIndex: Int = -1
+    var selectedCategoryTitle: String?
     private var isShowingLimitMessage = false
 
     var trimmedName: String {
@@ -128,6 +129,22 @@ class TrackerCreationViewController: UIViewController {
 
     func performCreate() {}
 
+    func openCategories() {
+        let store = CoreDataStack.shared.categoryStore
+        let preselected: TrackerCategory? = selectedCategoryTitle.flatMap { title in
+            store.categories.first { $0.title == title }
+        }
+        let vm = CategoriesViewModel(store: store, preselected: preselected)
+        vm.onCategorySelected = { [weak self] category in
+            self?.selectedCategoryTitle = category.title
+            self?.tableView.reloadData()
+            self?.updateCreateButtonState()
+            self?.navigationController?.popViewController(animated: true)
+        }
+        let categoriesVC = CategoriesViewController(viewModel: vm)
+        navigationController?.pushViewController(categoriesVC, animated: true)
+    }
+
     // MARK: - State Updates
     func updateCreateButtonState() {
         createButton.isEnabled = isCreateEnabled
@@ -171,7 +188,7 @@ class TrackerCreationViewController: UIViewController {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: SubtitleCell.reuseId, for: indexPath) as? SubtitleCell else {
             fatalError("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
         }
-        cell.configure(title: Strings.categoryTitle, subtitle: Strings.defaultCategoryName)
+        cell.configure(title: Strings.categoryTitle, subtitle: selectedCategoryTitle ?? "")
         cell.accessoryType = .disclosureIndicator
         return cell
     }
@@ -406,6 +423,9 @@ extension TrackerCreationViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if Section(rawValue: indexPath.section) == .category && indexPath.row == 0 {
+            openCategories()
+        }
     }
 
     private func applyNameCellStyle(_ cell: UITableViewCell, rowCount: Int) {

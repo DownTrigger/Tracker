@@ -43,6 +43,29 @@ final class TrackerCategoryStore: NSObject {
         let trackers = (object.trackers as? Set<TrackerCD>)?.compactMap { $0.toTracker() } ?? []
         return TrackerCategory(title: title, trackers: trackers)
     }
+
+    // MARK: - Public Methods
+    func addCategory(name: String) {
+        let object = TrackerCategoryCD(context: context)
+        object.id = UUID()
+        object.title = name
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("TrackerCategoryStore: addCategory save failed: \(error)")
+        }
+    }
+
+    func deleteCategory(withTitle title: String) {
+        let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
+        request.predicate = NSPredicate(format: "title == %@", title)
+        ((try? context.fetch(request)) ?? []).forEach { context.delete($0) }
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("TrackerCategoryStore: deleteCategory save failed: \(error)")
+        }
+    }
 }
 
 // MARK: - NSFetchedResultsControllerDelegate

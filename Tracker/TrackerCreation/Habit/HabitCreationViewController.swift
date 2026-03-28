@@ -17,7 +17,7 @@ final class HabitCreationViewController: TrackerCreationViewController {
     override func performCreate() {
         let schedule = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }
         let tracker = Tracker.create(name: trimmedName, schedule: schedule, emoji: selectedEmoji, colorIndex: selectedColorIndex)
-        onCreateTracker?(tracker)
+        onCreateTracker?(tracker, selectedCategoryTitle ?? Strings.defaultCategoryName)
         navigationController?.dismiss(animated: true)
     }
 
@@ -86,5 +86,6 @@ private extension HabitCreationViewController {
     enum Strings {
         static let screenTitle = "Новая привычка"
         static let scheduleTitle = "Расписание"
+        static let defaultCategoryName = "Важное"
     }
 }

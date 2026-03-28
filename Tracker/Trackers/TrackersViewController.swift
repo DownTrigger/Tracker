@@ -89,6 +89,17 @@ final class TrackersViewController: UIViewController {
         setupStoreObservers()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setupStoreObservers()
+        categories = categoryStore.categories
+        completedTrackers = recordStore.records
+        rebuildDisplayedCategories()
+        rebuildCompletedIdsForSelectedDate()
+        collectionView.reloadData()
+        updateEmptyStateVisibility()
+    }
+
     // MARK: - Setup
     private func setupNavigationBar() {
         navigationController?.setNavigationBarHidden(false, animated: false)
@@ -235,6 +246,11 @@ final class TrackersViewController: UIViewController {
     private func addTracker(_ tracker: Tracker, toCategoryWithTitle title: String) {
         do {
             try trackerStore.addTracker(tracker, toCategoryWithTitle: title)
+            categories = categoryStore.categories
+            rebuildDisplayedCategories()
+            rebuildCompletedIdsForSelectedDate()
+            collectionView.reloadData()
+            updateEmptyStateVisibility()
         } catch {
             assertionFailure("Failed to add tracker: \(error)")
         }
@@ -243,8 +259,8 @@ final class TrackersViewController: UIViewController {
 
     @objc private func addTrackerTapped() {
         let typeSelectionVC = TrackerTypeSelectionViewController()
-        typeSelectionVC.onCreateTracker = { [weak self] tracker in
-            self?.addTracker(tracker, toCategoryWithTitle: Strings.defaultCategoryName)
+        typeSelectionVC.onCreateTracker = { [weak self] tracker, categoryName in
+            self?.addTracker(tracker, toCategoryWithTitle: categoryName)
         }
         let nav = UINavigationController(rootViewController: typeSelectionVC)
         present(nav, animated: true)
