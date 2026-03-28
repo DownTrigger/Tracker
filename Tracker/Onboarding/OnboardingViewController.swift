@@ -2,19 +2,17 @@ import UIKit
 
 final class OnboardingViewController: UIViewController {
 
-    // MARK: - Data
-    private static let pages: [PageContent] = [
-        .init(
-            title: Strings.page1Title,
-            image: UIImage(resource: .blueBackground)
-        ),
-        .init(
-            title: Strings.page2Title,
-            image: UIImage(resource: .redBackground)
-        )
-    ]
+    // MARK: - ViewModel
+    private let viewModel: OnboardingViewModel
 
-    private var currentPageIndex: Int = 0
+    init(viewModel: OnboardingViewModel = OnboardingViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - UI
     private lazy var pageViewController: UIPageViewController = {
@@ -59,6 +57,9 @@ final class OnboardingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        viewModel.onCurrentPageChanged = { [weak self] index in
+            self?.pageControl.currentPage = index
+        }
     }
 
     // MARK: - Setup
@@ -96,12 +97,12 @@ final class OnboardingViewController: UIViewController {
 
     // MARK: - Helpers
     private func makePageViewController(at index: Int) -> OnboardingPageViewController {
-        let content = Self.pages[index]
+        let content = viewModel.pages[index]
         return OnboardingPageViewController(content: content, pageIndex: index)
     }
 
     private func showMainApp() {
-        UserDefaults.standard.set(true, forKey: Constants.onboardingCompletedKey)
+        viewModel.completeOnboarding()
         guard let window = view.window else { return }
         window.rootViewController = TabBarViewController()
     }
@@ -145,16 +146,13 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
     ) {
         guard completed,
               let current = pageViewController.viewControllers?.first as? OnboardingPageViewController else { return }
-        currentPageIndex = current.pageIndex
-        pageControl.currentPage = current.pageIndex
+        viewModel.setCurrentPage(current.pageIndex)
     }
 }
 
 // MARK: - Constants
 private extension OnboardingViewController {
     enum Constants {
-        // MARK: - State
-        static let onboardingCompletedKey = "onboardingCompleted"
         static let pagesCount = 2
 
         // MARK: - Buttons
@@ -170,8 +168,6 @@ private extension OnboardingViewController {
     }
 
     enum Strings {
-        static let page1Title = "Отслеживайте только то, что хотите"
-        static let page2Title = "Даже если это не литры воды и йога"
         static let primaryButtonTitle = "Вот это технологии!"
     }
 }
