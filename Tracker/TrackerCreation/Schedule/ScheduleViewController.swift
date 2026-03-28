@@ -3,8 +3,18 @@ import UIKit
 final class ScheduleViewController: UIViewController {
 
     // MARK: - State
-    var selectedWeekdays: Set<WeekDay> = []
+    private let viewModel: ScheduleViewModel
     var onComplete: ((Set<WeekDay>) -> Void)?
+
+    // MARK: - Init
+    init(viewModel: ScheduleViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - UI
     private lazy var tableView: UITableView = {
@@ -67,7 +77,7 @@ final class ScheduleViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func doneTapped() {
-        onComplete?(selectedWeekdays)
+        onComplete?(viewModel.selectedWeekdays)
         navigationController?.popViewController(animated: true)
     }
 }
@@ -85,13 +95,9 @@ extension ScheduleViewController: UITableViewDataSource {
         let day = WeekDay.displayOrder[indexPath.row]
         cell.configure(
             title: day.fullTitle,
-            isOn: selectedWeekdays.contains(day),
-            onSwitchChanged: { [weak self] isOn in
-                if isOn {
-                    self?.selectedWeekdays.insert(day)
-                } else {
-                    self?.selectedWeekdays.remove(day)
-                }
+            isOn: viewModel.selectedWeekdays.contains(day),
+            onSwitchChanged: { [weak self] _ in
+                self?.viewModel.toggle(day)
             }
         )
         return cell

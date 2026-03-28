@@ -11,6 +11,7 @@ class TrackerCreationViewController: UIViewController {
     var selectedColorIndex: Int = -1
     var selectedCategoryTitle: String?
     private var isShowingLimitMessage = false
+    var viewModel: TrackerCreationViewModel = TrackerCreationViewModel()
 
     var trimmedName: String {
         trackerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -83,6 +84,10 @@ class TrackerCreationViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         updateCreateButtonState()
+        viewModel.onFormValidityChanged = { [weak self] isValid in
+            self?.createButton.isEnabled = isValid
+            self?.createButton.backgroundColor = isValid ? AppColors.primaryLabel : AppColors.accentGray
+        }
     }
 
     // MARK: - Setup
@@ -137,6 +142,7 @@ class TrackerCreationViewController: UIViewController {
         let vm = CategoriesViewModel(store: store, preselected: preselected)
         vm.onCategorySelected = { [weak self] category in
             self?.selectedCategoryTitle = category.title
+            self?.viewModel.selectedCategoryTitle = category.title
             self?.tableView.reloadData()
             self?.updateCreateButtonState()
             self?.navigationController?.popViewController(animated: true)
@@ -171,6 +177,7 @@ class TrackerCreationViewController: UIViewController {
     // MARK: - Cell Configuration
     func handleNameChange(_ text: String?) {
         trackerName = text ?? ""
+        viewModel.trackerName = trackerName
         updateNameLimitRowIfNeeded()
         updateCreateButtonState()
     }
@@ -210,6 +217,7 @@ class TrackerCreationViewController: UIViewController {
         }
         cell.configure(onEmojiSelected: { [weak self] emoji in
             self?.selectedEmoji = emoji
+            self?.viewModel.selectedEmoji = emoji
             self?.updateCreateButtonState()
         }, selectedEmoji: selectedEmoji)
         return cell
@@ -221,6 +229,7 @@ class TrackerCreationViewController: UIViewController {
         }
         cell.configure(onColorSelected: { [weak self] index in
             self?.selectedColorIndex = index
+            self?.viewModel.selectedColorIndex = index
             self?.updateCreateButtonState()
         }, selectedColorIndex: selectedColorIndex)
         return cell

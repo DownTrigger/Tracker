@@ -5,8 +5,17 @@ final class HabitCreationViewController: TrackerCreationViewController {
     // MARK: - State
     var selectedWeekdays: Set<WeekDay> = []
 
+    private var habitViewModel: HabitCreationViewModel {
+        viewModel as! HabitCreationViewModel
+    }
+
     override var isCreateEnabled: Bool {
         super.isCreateEnabled && !selectedWeekdays.isEmpty
+    }
+
+    override func viewDidLoad() {
+        viewModel = HabitCreationViewModel()
+        super.viewDidLoad()
     }
 
     override var screenTitle: String { Self.Strings.screenTitle }
@@ -15,8 +24,7 @@ final class HabitCreationViewController: TrackerCreationViewController {
 
     // MARK: - Actions
     override func performCreate() {
-        let schedule = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }
-        let tracker = Tracker.create(name: trimmedName, schedule: schedule, emoji: selectedEmoji, colorIndex: selectedColorIndex)
+        let tracker = habitViewModel.buildTracker()
         onCreateTracker?(tracker, selectedCategoryTitle ?? Strings.defaultCategoryName)
         navigationController?.dismiss(animated: true)
     }
@@ -51,10 +59,11 @@ final class HabitCreationViewController: TrackerCreationViewController {
     }
 
     private func openSchedule() {
-        let scheduleVC = ScheduleViewController()
-        scheduleVC.selectedWeekdays = selectedWeekdays
+        let scheduleViewModel = ScheduleViewModel(selected: selectedWeekdays)
+        let scheduleVC = ScheduleViewController(viewModel: scheduleViewModel)
         scheduleVC.onComplete = { [weak self] weekdays in
             self?.selectedWeekdays = weekdays
+            self?.habitViewModel.selectedWeekdays = weekdays
             self?.tableView.reloadData()
             self?.updateCreateButtonState()
         }
