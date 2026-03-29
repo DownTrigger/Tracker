@@ -156,6 +156,16 @@ final class TrackersViewController: UIViewController {
     }
 
     // MARK: - Actions
+    private func showDeleteConfirmation(for indexPath: IndexPath) {
+        let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
+        let alert = UIAlertController(title: nil, message: Strings.deleteConfirmation, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: Strings.delete, style: .destructive) { [weak self] _ in
+            self?.viewModel.deleteTracker(id: tracker.id)
+        })
+        alert.addAction(UIAlertAction(title: Strings.cancel, style: .cancel))
+        present(alert, animated: true)
+    }
+
     private func addTracker(_ tracker: Tracker, toCategoryWithTitle title: String) {
         viewModel.addTracker(tracker, categoryName: title)
     }
@@ -187,7 +197,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
         let days = viewModel.completedDaysCount(for: tracker.id)
         let isCompleted = viewModel.isCompletedToday(trackerId: tracker.id)
-        let canComplete = viewModel.canComplete(for: customDatePicker.date)
+        let canComplete = viewModel.canComplete(for: viewModel.currentDate)
 
         cell.configure(viewModel: .init(
             name: tracker.name,
@@ -200,7 +210,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 
         cell.onCompleteTapped = { [weak self] in
             guard let self else { return }
-            guard self.viewModel.canComplete(for: self.customDatePicker.date) else { return }
+            guard self.viewModel.canComplete(for: self.viewModel.currentDate) else { return }
             self.viewModel.toggleCompletion(trackerId: tracker.id)
         }
         return cell
@@ -228,7 +238,47 @@ extension TrackersViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegate
 extension TrackersViewController: UICollectionViewDelegate {
-    // TODO: No methods needed yet.
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+            let pin = UIAction(title: Strings.pin) { _ in }
+            let edit = UIAction(title: Strings.edit) { _ in }
+            let delete = UIAction(title: Strings.delete, attributes: .destructive) { [weak self] _ in
+                self?.showDeleteConfirmation(for: indexPath)
+            }
+            return UIMenu(title: "", children: [pin, edit, delete])
+        }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        makeTargetedPreview(for: configuration, in: collectionView)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        makeTargetedPreview(for: configuration, in: collectionView)
+    }
+
+    private func makeTargetedPreview(
+        for configuration: UIContextMenuConfiguration,
+        in collectionView: UICollectionView
+    ) -> UITargetedPreview? {
+        guard let indexPath = configuration.identifier as? NSIndexPath,
+              let cell = collectionView.cellForItem(at: indexPath as IndexPath) as? TrackerCell
+        else { return nil }
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        return UITargetedPreview(view: cell.previewView, parameters: parameters)
+    }
 }
 
 // MARK: - UISearchResultsUpdating
@@ -261,6 +311,10 @@ private extension TrackersViewController {
         static let screenTitle = "Трекеры"
         static let searchPlaceholder = "Поиск"
         static let emptyStateText = "Что будем отслеживать?"
-        static let defaultCategoryName = "Важное"
+        static let pin = "Закрепить"
+        static let edit = "Редактировать"
+        static let delete = "Удалить"
+        static let deleteConfirmation = "Уверены что хотите удалить трекер?"
+        static let cancel = "Отменить"
     }
 }

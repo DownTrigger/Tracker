@@ -23,12 +23,28 @@ final class TrackerStore {
         try context.save()
     }
 
+    func deleteTracker(id: UUID) {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        do {
+            let objects = try context.fetch(request)
+            objects.forEach { context.delete($0) }
+            try context.save()
+        } catch {
+            assertionFailure("TrackerStore: deleteTracker failed: \(error)")
+        }
+    }
+
     // MARK: - Private Methods
     private func findOrCreateCategory(title: String) -> TrackerCategoryCD {
         let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
         request.predicate = NSPredicate(format: "title == %@", title)
-        if let existing = try? context.fetch(request).first {
-            return existing
+        do {
+            if let existing = try context.fetch(request).first {
+                return existing
+            }
+        } catch {
+            assertionFailure("TrackerStore: findOrCreateCategory fetch failed: \(error)")
         }
         let newCategory = TrackerCategoryCD(context: context)
         newCategory.id = UUID()

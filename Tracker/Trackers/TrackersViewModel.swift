@@ -11,7 +11,7 @@ final class TrackersViewModel {
     // MARK: - Private State
     private var allCategories: [TrackerCategory] = []
     private var completedRecords: [TrackerRecord] = []
-    private var currentDate: Date = Date()
+    private(set) var currentDate: Date = Date()
     private var searchText: String = ""
     private var completedIdsForDate: Set<UUID> = []
 
@@ -50,9 +50,19 @@ final class TrackersViewModel {
         }
     }
 
+    func deleteTracker(id: UUID) {
+        trackerStore.deleteTracker(id: id)
+        allCategories = categoryStore.categories
+        rebuild()
+        onDataUpdated?()
+    }
+
     func addTracker(_ tracker: Tracker, categoryName: String) {
         do {
             try trackerStore.addTracker(tracker, toCategoryWithTitle: categoryName)
+            allCategories = categoryStore.categories
+            rebuild()
+            onDataUpdated?()
         } catch {
             assertionFailure("TrackersViewModel: addTracker failed: \(error)")
         }
