@@ -1,6 +1,6 @@
-import UIKit
+import DeveloperToolsSupport
 
 struct PageContent {
     let title: String
-    let image: UIImage
+    let image: ImageResource
 }

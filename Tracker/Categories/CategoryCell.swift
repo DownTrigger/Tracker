@@ -28,8 +28,8 @@ final class CategoryCell: UITableViewCell {
         selectionStyle = .none
         contentView.addSubview(titleLabel)
         NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -41),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.contentLeading),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.accessoryTrailingReserved),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
@@ -39,5 +39,13 @@ final class CategoryCell: UITableViewCell {
         titleLabel.text = title
         accessoryType = isSelected ? .checkmark : .none
         tintColor = AppColors.accentBlue
+    }
+}
+
+// MARK: - Constants
+private extension CategoryCell {
+    enum Constants {
+        static let contentLeading: CGFloat = 16
+        static let accessoryTrailingReserved: CGFloat = 41
     }
 }

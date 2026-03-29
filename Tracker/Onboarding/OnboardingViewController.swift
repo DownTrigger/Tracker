@@ -31,9 +31,9 @@ final class OnboardingViewController: UIViewController {
         return vc
     }()
 
-    private let pageControl: UIPageControl = {
+    private lazy var pageControl: UIPageControl = {
         let control = UIPageControl()
-        control.numberOfPages = Constants.pagesCount
+        control.numberOfPages = viewModel.pages.count
         control.currentPage = 0
         control.currentPageIndicatorTintColor = AppColors.accentBlack
         control.pageIndicatorTintColor = AppColors.accentBlack.withAlphaComponent(Constants.pageControlInactiveAlpha)
@@ -57,9 +57,7 @@ final class OnboardingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        viewModel.onCurrentPageChanged = { [weak self] index in
-            self?.pageControl.currentPage = index
-        }
+        bindViewModel()
     }
 
     // MARK: - Setup
@@ -93,6 +91,13 @@ final class OnboardingViewController: UIViewController {
             primaryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.buttonBottomPadding),
             primaryButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight)
         ])
+    }
+
+    // MARK: - Bindings
+    private func bindViewModel() {
+        viewModel.onCurrentPageChanged = { [weak self] index in
+            self?.pageControl.currentPage = index
+        }
     }
 
     // MARK: - Helpers
@@ -131,7 +136,7 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
     ) -> UIViewController? {
         guard let pageVC = viewController as? OnboardingPageViewController else { return nil }
         let next = pageVC.pageIndex + 1
-        guard next < Constants.pagesCount else { return nil }
+        guard next < viewModel.pages.count else { return nil }
         return makePageViewController(at: next)
     }
 }
@@ -153,8 +158,6 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 // MARK: - Constants
 private extension OnboardingViewController {
     enum Constants {
-        static let pagesCount = 2
-
         // MARK: - Buttons
         static let buttonFontSize: CGFloat = 16
         static let buttonCornerRadius: CGFloat = 16

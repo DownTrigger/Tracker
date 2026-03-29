@@ -59,11 +59,12 @@ final class TrackerCategoryStore: NSObject {
     func deleteCategory(withTitle title: String) {
         let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
         request.predicate = NSPredicate(format: "title == %@", title)
-        ((try? context.fetch(request)) ?? []).forEach { context.delete($0) }
         do {
+            let objects = try context.fetch(request)
+            objects.forEach { context.delete($0) }
             try context.save()
         } catch {
-            assertionFailure("TrackerCategoryStore: deleteCategory save failed: \(error)")
+            assertionFailure("TrackerCategoryStore: deleteCategory failed: \(error)")
         }
     }
 }

@@ -46,10 +46,6 @@ final class ColorSelectionView: UIView {
         collectionView.reloadData()
     }
 
-    var selectedIndex: Int {
-        selectedColorIndex
-    }
-
     static func preferredContentHeight(forWidth width: CGFloat) -> CGFloat {
         guard width > 0 else { return 3 * Constants.cellSizeMax + 2 * Constants.spacing }
         let columnCount = Constants.columnCount

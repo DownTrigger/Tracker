@@ -28,7 +28,7 @@ final class OnboardingPageViewController: UIViewController {
         self.pageIndex = pageIndex
         super.init(nibName: nil, bundle: nil)
         titleLabel.text = content.title
-        backgroundImageView.image = content.image
+        backgroundImageView.image = UIImage(resource: content.image)
     }
 
     required init?(coder: NSCoder) {

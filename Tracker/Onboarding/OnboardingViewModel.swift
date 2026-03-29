@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 
 final class OnboardingViewModel {
 
@@ -12,14 +12,8 @@ final class OnboardingViewModel {
     // MARK: - Init
     init() {
         pages = [
-            PageContent(
-                title: "Отслеживайте только то, что хотите",
-                image: UIImage(resource: .blueBackground)
-            ),
-            PageContent(
-                title: "Даже если это не литры воды и йога",
-                image: UIImage(resource: .redBackground)
-            )
+            PageContent(title: "Отслеживайте только то, что хотите", image: .blueBackground),
+            PageContent(title: "Даже если это не литры воды и йога", image: .redBackground)
         ]
     }
 

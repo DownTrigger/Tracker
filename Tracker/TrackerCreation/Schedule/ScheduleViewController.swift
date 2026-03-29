@@ -19,7 +19,6 @@ final class ScheduleViewController: UIViewController {
     // MARK: - UI
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
-        table.delegate = self
         table.dataSource = self
         table.register(ScheduleDayCell.self, forCellReuseIdentifier: ScheduleDayCell.reuseId)
         table.backgroundColor = AppColors.primaryBackground
@@ -102,11 +101,6 @@ extension ScheduleViewController: UITableViewDataSource {
         )
         return cell
     }
-}
-
-// MARK: - UITableViewDelegate
-extension ScheduleViewController: UITableViewDelegate {
-    // TODO: No methods needed yet.
 }
 
 // MARK: - Constants

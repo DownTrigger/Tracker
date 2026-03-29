@@ -47,6 +47,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     // MARK: - Setup
     private func setupUI() {
         title = Strings.screenTitle
+        navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         setupViewHierarchy()
         setupConstraints()

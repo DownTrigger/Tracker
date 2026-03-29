@@ -24,5 +24,16 @@ class TrackerCreationViewModel {
         !trackerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !selectedEmoji.isEmpty
             && selectedColorIndex >= 0
+            && selectedCategoryTitle != nil
+    }
+
+    // MARK: - Factory
+    func buildTracker(schedule: [Int]) -> Tracker {
+        return Tracker.create(
+            name: trackerName.trimmingCharacters(in: .whitespacesAndNewlines),
+            schedule: schedule,
+            emoji: selectedEmoji,
+            colorIndex: selectedColorIndex
+        )
     }
 }

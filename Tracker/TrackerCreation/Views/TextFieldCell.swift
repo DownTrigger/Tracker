@@ -39,8 +39,8 @@ final class TextFieldCell: UITableViewCell {
 
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            textField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            textField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.horizontalPadding),
+            textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.horizontalPadding),
             textField.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
@@ -59,21 +59,12 @@ final class TextFieldCell: UITableViewCell {
         onText?(textField.text)
     }
 
-    // MARK: - Static
-    static func makeNameLimitFooter() -> UIView {
-        let label = UILabel()
-        label.text = nameLimitFooterText
-        label.font = .systemFont(ofSize: 17)
-        label.textColor = AppColors.accentRed
-        label.translatesAutoresizingMaskIntoConstraints = false
-        let container = UIView()
-        container.backgroundColor = .clear
-        container.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            label.topAnchor.constraint(equalTo: container.topAnchor, constant: 8)
-        ])
-        return container
+}
+
+// MARK: - Constants
+private extension TextFieldCell {
+    enum Constants {
+        static let horizontalPadding: CGFloat = 16
     }
 }
 

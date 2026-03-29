@@ -8,8 +8,4 @@ enum TrackerEmojis {
         "📚", "🎯", "⭐", "🔥", "💧", "🍎", "☕", "🌙"
     ]
 
-    // MARK: - Public
-    static var random: String {
-        all.randomElement() ?? "⭐"
-    }
 }

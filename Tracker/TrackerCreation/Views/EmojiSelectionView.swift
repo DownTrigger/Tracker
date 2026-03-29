@@ -46,10 +46,6 @@ final class EmojiSelectionView: UIView {
         collectionView.reloadData()
     }
 
-    var selectedValue: String {
-        selectedEmoji
-    }
-
     static func preferredContentHeight(forWidth width: CGFloat) -> CGFloat {
         guard width > 0 else { return 4 * Constants.cellSizeMax + 3 * Constants.spacing }
         let columnCount = Constants.columnCount

@@ -37,7 +37,6 @@ final class TabBarViewController: UITabBarController {
         )
         let trackersViewController = TrackersViewController(viewModel: trackersViewModel)
         let trackersNavController = UINavigationController(rootViewController: trackersViewController)
-        trackersViewController.view.backgroundColor = AppColors.primaryBackground
         trackersViewController.tabBarItem = UITabBarItem(
             title: "Трекеры",
             image: UIImage(resource: .iconCircle),
@@ -46,7 +45,6 @@ final class TabBarViewController: UITabBarController {
 
         let statisticsViewController = StatisticsViewController()
         let statisticsNavController = UINavigationController(rootViewController: statisticsViewController)
-        statisticsViewController.view.backgroundColor = AppColors.primaryBackground
         statisticsViewController.tabBarItem = UITabBarItem(
             title: "Статистика",
             image: UIImage(resource: .iconHare),

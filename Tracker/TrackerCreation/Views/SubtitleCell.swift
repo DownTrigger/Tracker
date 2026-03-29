@@ -26,7 +26,7 @@ final class SubtitleCell: UITableViewCell {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.alignment = .leading
-        stack.spacing = 2
+        stack.spacing = Constants.labelsSpacing
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
@@ -41,6 +41,8 @@ final class SubtitleCell: UITableViewCell {
         accessoryType = .disclosureIndicator
     }
 
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
     // MARK: - Private
     private func setupViewHierarchy() {
         labelsStack.addArrangedSubview(titleLabel)
@@ -50,17 +52,24 @@ final class SubtitleCell: UITableViewCell {
 
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            labelsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            labelsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.contentLeading),
             labelsStack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            labelsStack.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -36)
+            labelsStack.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -Constants.contentTrailing)
         ])
     }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     // MARK: - Public
     func configure(title: String, subtitle: String) {
         titleLabel.text = title
         subtitleLabel.text = subtitle.isEmpty ? nil : subtitle
+    }
+}
+
+// MARK: - Constants
+private extension SubtitleCell {
+    enum Constants {
+        static let contentLeading: CGFloat = 16
+        static let contentTrailing: CGFloat = 36
+        static let labelsSpacing: CGFloat = 2
     }
 }

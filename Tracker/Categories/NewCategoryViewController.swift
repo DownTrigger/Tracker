@@ -2,6 +2,9 @@ import UIKit
 
 final class NewCategoryViewController: UIViewController {
 
+    // MARK: - ViewModel
+    private let viewModel: NewCategoryViewModel
+
     // MARK: - Callbacks
     var onCategoryCreated: ((String) -> Void)?
 
@@ -11,8 +14,8 @@ final class NewCategoryViewController: UIViewController {
         field.placeholder = Strings.placeholder
         field.font = .systemFont(ofSize: 17)
         field.backgroundColor = AppColors.secondaryBackground
-        field.layer.cornerRadius = 16
-        field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
+        field.layer.cornerRadius = Constants.textFieldCornerRadius
+        field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.horizontalPadding, height: 0))
         field.leftViewMode = .always
         field.clearButtonMode = .whileEditing
         field.addTarget(self, action: #selector(textChanged), for: .editingChanged)
@@ -24,8 +27,8 @@ final class NewCategoryViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle(Strings.done, for: .normal)
         button.setTitleColor(AppColors.accentWhite, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        button.layer.cornerRadius = 16
+        button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
+        button.layer.cornerRadius = Constants.buttonCornerRadius
         button.isEnabled = false
         button.backgroundColor = AppColors.accentGray
         button.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
@@ -33,10 +36,21 @@ final class NewCategoryViewController: UIViewController {
         return button
     }()
 
+    // MARK: - Init
+    init(viewModel: NewCategoryViewModel = NewCategoryViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        bindViewModel()
     }
 
     // MARK: - Setup
@@ -55,27 +69,34 @@ final class NewCategoryViewController: UIViewController {
 
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textField.heightAnchor.constraint(equalToConstant: 75),
+            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.textFieldTopPadding),
+            textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalPadding),
+            textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalPadding),
+            textField.heightAnchor.constraint(equalToConstant: Constants.textFieldHeight),
 
-            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            doneButton.heightAnchor.constraint(equalToConstant: 60)
+            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.buttonHorizontalPadding),
+            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.buttonHorizontalPadding),
+            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.buttonBottomPadding),
+            doneButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight)
         ])
+    }
+
+    // MARK: - Bindings
+    private func bindViewModel() {
+        viewModel.onFormValidityChanged = { [weak self] isValid in
+            self?.doneButton.isEnabled = isValid
+            self?.doneButton.backgroundColor = isValid ? AppColors.accentBlack : AppColors.accentGray
+        }
     }
 
     // MARK: - Actions
     @objc private func textChanged() {
-        let hasText = !(textField.text?.trimmingCharacters(in: .whitespaces).isEmpty ?? true)
-        doneButton.isEnabled = hasText
-        doneButton.backgroundColor = hasText ? AppColors.accentBlack : AppColors.accentGray
+        viewModel.name = textField.text ?? ""
     }
 
     @objc private func doneTapped() {
-        guard let name = textField.text?.trimmingCharacters(in: .whitespaces), !name.isEmpty else { return }
+        let name = viewModel.trimmedName
+        guard !name.isEmpty else { return }
         onCategoryCreated?(name)
         navigationController?.popViewController(animated: true)
     }
@@ -83,6 +104,18 @@ final class NewCategoryViewController: UIViewController {
 
 // MARK: - Constants
 private extension NewCategoryViewController {
+    enum Constants {
+        static let textFieldTopPadding: CGFloat = 24
+        static let horizontalPadding: CGFloat = 16
+        static let textFieldHeight: CGFloat = 75
+        static let textFieldCornerRadius: CGFloat = 16
+        static let buttonHorizontalPadding: CGFloat = 20
+        static let buttonBottomPadding: CGFloat = 16
+        static let buttonHeight: CGFloat = 60
+        static let buttonFontSize: CGFloat = 16
+        static let buttonCornerRadius: CGFloat = 16
+    }
+
     enum Strings {
         static let screenTitle = "Новая категория"
         static let placeholder = "Введите название категории"

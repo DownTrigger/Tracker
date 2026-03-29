@@ -12,6 +12,14 @@ final class HabitCreationViewModel: TrackerCreationViewModel {
         super.isFormValid && !selectedWeekdays.isEmpty
     }
 
+    // MARK: - Presentation
+    var scheduleSubtitle: String {
+        if selectedWeekdays.isEmpty { return "" }
+        let sorted = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }
+        if sorted.count == 7 { return "Каждый день" }
+        return sorted.map { $0.shortTitle }.joined(separator: ", ")
+    }
+
     // MARK: - Factory
     func buildTracker() -> Tracker {
         let schedule = selectedWeekdays

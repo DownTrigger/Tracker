@@ -3,19 +3,17 @@ import UIKit
 final class HabitCreationViewController: TrackerCreationViewController {
 
     // MARK: - State
-    var selectedWeekdays: Set<WeekDay> = []
+    private let habitViewModel: HabitCreationViewModel
 
-    private var habitViewModel: HabitCreationViewModel {
-        viewModel as! HabitCreationViewModel
+    // MARK: - Init
+    init() {
+        let vm = HabitCreationViewModel()
+        self.habitViewModel = vm
+        super.init(viewModel: vm)
     }
 
-    override var isCreateEnabled: Bool {
-        super.isCreateEnabled && !selectedWeekdays.isEmpty
-    }
-
-    override func viewDidLoad() {
-        viewModel = HabitCreationViewModel()
-        super.viewDidLoad()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override var screenTitle: String { Self.Strings.screenTitle }
@@ -24,8 +22,9 @@ final class HabitCreationViewController: TrackerCreationViewController {
 
     // MARK: - Actions
     override func performCreate() {
+        guard let categoryTitle = viewModel.selectedCategoryTitle else { return }
         let tracker = habitViewModel.buildTracker()
-        onCreateTracker?(tracker, selectedCategoryTitle ?? Strings.defaultCategoryName)
+        onCreateTracker?(tracker, categoryTitle)
         navigationController?.dismiss(animated: true)
     }
 
@@ -42,12 +41,7 @@ final class HabitCreationViewController: TrackerCreationViewController {
     }
 
     // MARK: - Private
-    private var scheduleSubtitle: String {
-        if selectedWeekdays.isEmpty { return "" }
-        let sorted = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }
-        if sorted.count == 7 { return "Каждый день" }
-        return sorted.map { $0.shortTitle }.joined(separator: ", ")
-    }
+    private var scheduleSubtitle: String { habitViewModel.scheduleSubtitle }
 
     private func dequeueScheduleCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: SubtitleCell.reuseId, for: indexPath) as? SubtitleCell else {
@@ -59,13 +53,11 @@ final class HabitCreationViewController: TrackerCreationViewController {
     }
 
     private func openSchedule() {
-        let scheduleViewModel = ScheduleViewModel(selected: selectedWeekdays)
+        let scheduleViewModel = ScheduleViewModel(selected: habitViewModel.selectedWeekdays)
         let scheduleVC = ScheduleViewController(viewModel: scheduleViewModel)
         scheduleVC.onComplete = { [weak self] weekdays in
-            self?.selectedWeekdays = weekdays
             self?.habitViewModel.selectedWeekdays = weekdays
             self?.tableView.reloadData()
-            self?.updateCreateButtonState()
         }
         navigationController?.pushViewController(scheduleVC, animated: true)
     }
@@ -95,6 +87,5 @@ private extension HabitCreationViewController {
     enum Strings {
         static let screenTitle = "Новая привычка"
         static let scheduleTitle = "Расписание"
-        static let defaultCategoryName = "Важное"
     }
 }

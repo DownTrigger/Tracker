@@ -6,23 +6,27 @@ class TrackerCreationViewController: UIViewController {
     var onCreateTracker: ((Tracker, String) -> Void)?
 
     // MARK: - State
-    var trackerName: String = ""
-    var selectedEmoji: String = ""
-    var selectedColorIndex: Int = -1
-    var selectedCategoryTitle: String?
     private var isShowingLimitMessage = false
-    var viewModel: TrackerCreationViewModel = TrackerCreationViewModel()
+    internal let viewModel: TrackerCreationViewModel
+
+    // MARK: - Init
+    init(viewModel: TrackerCreationViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     var trimmedName: String {
-        trackerName.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.trackerName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    var isCreateEnabled: Bool {
-        !trimmedName.isEmpty && !selectedEmoji.isEmpty && selectedColorIndex >= 0
-    }
+    var isCreateEnabled: Bool { viewModel.isFormValid }
 
     var shouldShowNameLimitRow: Bool {
-        trackerName.count >= TextFieldCell.maxNameLength
+        viewModel.trackerName.count >= TextFieldCell.maxNameLength
     }
 
     var categoryRowCount: Int { 1 }
@@ -83,11 +87,16 @@ class TrackerCreationViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        updateCreateButtonState()
+        bindViewModel()
+    }
+
+    // MARK: - Bindings
+    private func bindViewModel() {
         viewModel.onFormValidityChanged = { [weak self] isValid in
             self?.createButton.isEnabled = isValid
             self?.createButton.backgroundColor = isValid ? AppColors.primaryLabel : AppColors.accentGray
         }
+        viewModel.onFormValidityChanged?(viewModel.isFormValid)
     }
 
     // MARK: - Setup
@@ -136,25 +145,16 @@ class TrackerCreationViewController: UIViewController {
 
     func openCategories() {
         let store = CoreDataStack.shared.categoryStore
-        let preselected: TrackerCategory? = selectedCategoryTitle.flatMap { title in
+        let preselected: TrackerCategory? = viewModel.selectedCategoryTitle.flatMap { title in
             store.categories.first { $0.title == title }
         }
         let vm = CategoriesViewModel(store: store, preselected: preselected)
-        vm.onCategorySelected = { [weak self] category in
-            self?.selectedCategoryTitle = category.title
+        let categoriesVC = CategoriesViewController(viewModel: vm)
+        categoriesVC.onCategoryPicked = { [weak self] category in
             self?.viewModel.selectedCategoryTitle = category.title
             self?.tableView.reloadData()
-            self?.updateCreateButtonState()
-            self?.navigationController?.popViewController(animated: true)
         }
-        let categoriesVC = CategoriesViewController(viewModel: vm)
         navigationController?.pushViewController(categoriesVC, animated: true)
-    }
-
-    // MARK: - State Updates
-    func updateCreateButtonState() {
-        createButton.isEnabled = isCreateEnabled
-        createButton.backgroundColor = isCreateEnabled ? AppColors.primaryLabel : AppColors.accentGray
     }
 
     func updateNameLimitRowIfNeeded() {
@@ -176,17 +176,15 @@ class TrackerCreationViewController: UIViewController {
 
     // MARK: - Cell Configuration
     func handleNameChange(_ text: String?) {
-        trackerName = text ?? ""
-        viewModel.trackerName = trackerName
+        viewModel.trackerName = text ?? ""
         updateNameLimitRowIfNeeded()
-        updateCreateButtonState()
     }
 
     func dequeueNameCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TextFieldCell.reuseId, for: indexPath) as? TextFieldCell else {
             fatalError("Failed to dequeue \(TextFieldCell.self). Check cell registration.")
         }
-        cell.configure(placeholder: Strings.namePlaceholder, currentText: trackerName, onText: handleNameChange)
+        cell.configure(placeholder: Strings.namePlaceholder, currentText: viewModel.trackerName, onText: handleNameChange)
         cell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
         return cell
     }
@@ -195,7 +193,7 @@ class TrackerCreationViewController: UIViewController {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: SubtitleCell.reuseId, for: indexPath) as? SubtitleCell else {
             fatalError("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
         }
-        cell.configure(title: Strings.categoryTitle, subtitle: selectedCategoryTitle ?? "")
+        cell.configure(title: Strings.categoryTitle, subtitle: viewModel.selectedCategoryTitle ?? "")
         cell.accessoryType = .disclosureIndicator
         return cell
     }
@@ -216,10 +214,8 @@ class TrackerCreationViewController: UIViewController {
             fatalError("Failed to dequeue \(EmojiSectionCell.self). Check cell registration.")
         }
         cell.configure(onEmojiSelected: { [weak self] emoji in
-            self?.selectedEmoji = emoji
             self?.viewModel.selectedEmoji = emoji
-            self?.updateCreateButtonState()
-        }, selectedEmoji: selectedEmoji)
+        }, selectedEmoji: viewModel.selectedEmoji)
         return cell
     }
 
@@ -228,10 +224,8 @@ class TrackerCreationViewController: UIViewController {
             fatalError("Failed to dequeue \(ColorSectionCell.self). Check cell registration.")
         }
         cell.configure(onColorSelected: { [weak self] index in
-            self?.selectedColorIndex = index
             self?.viewModel.selectedColorIndex = index
-            self?.updateCreateButtonState()
-        }, selectedColorIndex: selectedColorIndex)
+        }, selectedColorIndex: viewModel.selectedColorIndex)
         return cell
     }
 
@@ -289,8 +283,7 @@ private extension TrackerCreationViewController {
 
         // MARK: - Section headers
         static let sectionHeaderLeading: CGFloat = 12
-        static let sectionHeaderHeight: CGFloat = 0
-        static let sectionHeaderLabelBottom: CGFloat = 0
+        static let sectionHeaderFontSize: CGFloat = 19
 
         // MARK: - Emoji & color sections
         static let emojiSectionVerticalInsetTotal: CGFloat = 48
@@ -306,7 +299,6 @@ private extension TrackerCreationViewController {
         // MARK: - Labels & placeholders
         static let namePlaceholder = "Введите название трекера"
         static let categoryTitle = "Категория"
-        static let defaultCategoryName = "Важное"
         static let emojiSectionTitle = "Emoji"
         static let colorSectionTitle = "Цвет"
     }
@@ -384,14 +376,14 @@ extension TrackerCreationViewController: UITableViewDelegate {
         guard let text = title else { return nil }
         let label = UILabel()
         label.text = text
-        label.font = .systemFont(ofSize: 19, weight: .bold)
+        label.font = .systemFont(ofSize: Constants.sectionHeaderFontSize, weight: .bold)
         label.textColor = AppColors.primaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         let container = UIView()
         container.addSubview(label)
         NSLayoutConstraint.activate([
             label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: Constants.sectionHeaderLeading),
-            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -Constants.sectionHeaderLabelBottom)
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
         return container
     }
@@ -408,7 +400,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         guard let sectionKind = Section(rawValue: section) else { return 0 }
         switch sectionKind {
-        case .emoji, .color: return Constants.sectionHeaderHeight
+        case .emoji, .color: return 0
         default: return 0
         }
     }

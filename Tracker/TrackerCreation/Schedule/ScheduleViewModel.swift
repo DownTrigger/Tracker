@@ -5,9 +5,6 @@ final class ScheduleViewModel {
     // MARK: - State
     private(set) var selectedWeekdays: Set<WeekDay>
 
-    // MARK: - Bindings
-    var onWeekdaysChanged: ((Set<WeekDay>) -> Void)?
-
     // MARK: - Init
     init(selected: Set<WeekDay> = []) {
         self.selectedWeekdays = selected
@@ -20,6 +17,5 @@ final class ScheduleViewModel {
         } else {
             selectedWeekdays.insert(weekday)
         }
-        onWeekdaysChanged?(selectedWeekdays)
     }
 }

@@ -4,6 +4,7 @@ final class CategoriesViewController: UIViewController {
 
     // MARK: - Properties
     private let viewModel: CategoriesViewModel
+    var onCategoryPicked: ((TrackerCategory) -> Void)?
 
     // MARK: - UI
     private lazy var tableView: UITableView = {
@@ -28,7 +29,7 @@ final class CategoriesViewController: UIViewController {
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
         label.text = Strings.emptyState
-        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.font = .systemFont(ofSize: Constants.emptyStateLabelFontSize, weight: .medium)
         label.textColor = AppColors.primaryLabel
         label.textAlignment = .center
         label.numberOfLines = 0
@@ -40,9 +41,9 @@ final class CategoriesViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle(Strings.addCategory, for: .normal)
         button.setTitleColor(AppColors.accentWhite, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
         button.backgroundColor = AppColors.accentBlack
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = Constants.buttonCornerRadius
         button.addTarget(self, action: #selector(addCategoryTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -88,22 +89,22 @@ final class CategoriesViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: addButton.topAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: addButton.topAnchor, constant: -Constants.tableBottomSpacing),
 
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
-            emptyStateImageView.widthAnchor.constraint(equalToConstant: 80),
-            emptyStateImageView.heightAnchor.constraint(equalToConstant: 80),
+            emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -Constants.emptyStateCenterOffset),
+            emptyStateImageView.widthAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
+            emptyStateImageView.heightAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
 
-            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: 8),
-            emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Constants.emptyStateLabelTopSpacing),
+            emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.labelHorizontalPadding),
+            emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.labelHorizontalPadding),
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 
-            addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            addButton.heightAnchor.constraint(equalToConstant: 60)
+            addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.buttonHorizontalPadding),
+            addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.buttonHorizontalPadding),
+            addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.buttonBottomPadding),
+            addButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight)
         ])
     }
 
@@ -117,6 +118,10 @@ final class CategoriesViewController: UIViewController {
         viewModel.onCategoriesUpdated = { [weak self] _ in
             self?.tableView.reloadData()
             self?.updateEmptyState()
+        }
+        viewModel.onCategorySelected = { [weak self] category in
+            self?.onCategoryPicked?(category)
+            self?.navigationController?.popViewController(animated: true)
         }
     }
 
@@ -141,7 +146,7 @@ final class CategoriesViewController: UIViewController {
         guard gesture.state == .began else { return }
         let point = gesture.location(in: tableView)
         guard let indexPath = tableView.indexPathForRow(at: point) else { return }
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: nil, message: Strings.deleteConfirmation, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: Strings.delete, style: .destructive) { [weak self] _ in
             self?.viewModel.deleteCategory(at: indexPath.row)
         })
@@ -176,11 +181,26 @@ extension CategoriesViewController: UITableViewDelegate {
 
 // MARK: - Constants
 private extension CategoriesViewController {
+    enum Constants {
+        static let emptyStateImageSize: CGFloat = 80
+        static let emptyStateCenterOffset: CGFloat = 20
+        static let emptyStateLabelTopSpacing: CGFloat = 8
+        static let emptyStateLabelFontSize: CGFloat = 12
+        static let labelHorizontalPadding: CGFloat = 16
+        static let tableBottomSpacing: CGFloat = 16
+        static let buttonHorizontalPadding: CGFloat = 20
+        static let buttonBottomPadding: CGFloat = 16
+        static let buttonHeight: CGFloat = 60
+        static let buttonFontSize: CGFloat = 16
+        static let buttonCornerRadius: CGFloat = 16
+    }
+
     enum Strings {
         static let screenTitle = "Категория"
         static let addCategory = "Добавить категорию"
-        static let emptyState = "Привычки и события можно\nобъеденить по смыслу"
+        static let emptyState = "Привычки и события можно\nобъединить по смыслу"
         static let delete = "Удалить"
+        static let deleteConfirmation = "Эта категория точно не нужна?"
         static let cancel = "Отменить"
     }
 }
