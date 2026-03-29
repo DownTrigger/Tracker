@@ -40,7 +40,9 @@ final class TrackerCategoryStore: NSObject {
     // MARK: - Private Methods
     private func makeCategory(from object: TrackerCategoryCD) -> TrackerCategory? {
         guard let title = object.title else { return nil }
-        let trackers = (object.trackers as? Set<TrackerCD>)?.compactMap { $0.toTracker() } ?? []
+        let trackers = (object.trackers as? Set<TrackerCD>)?
+            .compactMap { $0.toTracker() }
+            .sorted { $0.name < $1.name } ?? []
         return TrackerCategory(title: title, trackers: trackers)
     }
 

@@ -5,6 +5,21 @@ final class TrackerTypeSelectionViewController: UIViewController {
     // MARK: - Callbacks
     var onCreateTracker: ((Tracker, String) -> Void)?
 
+    // MARK: - Dependencies
+    private let categoryStore: TrackerCategoryStore
+    private let viewModel: TrackerTypeSelectionViewModel
+
+    // MARK: - Init
+    init(categoryStore: TrackerCategoryStore) {
+        self.categoryStore = categoryStore
+        self.viewModel = TrackerTypeSelectionViewModel()
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     // MARK: - UI
     private lazy var habitButton: UIButton = {
         let button = UIButton(type: .system)
@@ -42,6 +57,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        bindViewModel()
     }
 
     // MARK: - Setup
@@ -69,21 +85,33 @@ final class TrackerTypeSelectionViewController: UIViewController {
         ])
     }
 
+    // MARK: - Bindings
+    private func bindViewModel() {
+        viewModel.onHabitSelected = { [weak self] in
+            guard let self else { return }
+            let vc = HabitCreationViewController(categoryStore: self.categoryStore)
+            vc.onCreateTracker = { [weak self] tracker, categoryName in
+                self?.onCreateTracker?(tracker, categoryName)
+            }
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        viewModel.onIrregularSelected = { [weak self] in
+            guard let self else { return }
+            let vc = IrregularEventCreationViewController(categoryStore: self.categoryStore)
+            vc.onCreateTracker = { [weak self] tracker, categoryName in
+                self?.onCreateTracker?(tracker, categoryName)
+            }
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+
     // MARK: - Actions
     @objc private func habitTapped() {
-        let vc = HabitCreationViewController()
-        vc.onCreateTracker = { [weak self] tracker, categoryName in
-            self?.onCreateTracker?(tracker, categoryName)
-        }
-        navigationController?.pushViewController(vc, animated: true)
+        viewModel.habitChosen()
     }
 
     @objc private func irregularEventTapped() {
-        let vc = IrregularEventCreationViewController()
-        vc.onCreateTracker = { [weak self] tracker, categoryName in
-            self?.onCreateTracker?(tracker, categoryName)
-        }
-        navigationController?.pushViewController(vc, animated: true)
+        viewModel.irregularChosen()
     }
 }
 

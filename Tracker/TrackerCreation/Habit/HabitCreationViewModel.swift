@@ -2,6 +2,11 @@ import Foundation
 
 final class HabitCreationViewModel: TrackerCreationViewModel {
 
+    // MARK: - Init
+    override init(categoryStore: TrackerCategoryStore) {
+        super.init(categoryStore: categoryStore)
+    }
+
     // MARK: - State
     var selectedWeekdays: Set<WeekDay> = [] {
         didSet { onFormValidityChanged?(isFormValid) }

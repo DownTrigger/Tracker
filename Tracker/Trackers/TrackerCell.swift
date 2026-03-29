@@ -10,7 +10,7 @@ final class TrackerCell: UICollectionViewCell {
         let name: String
         let emoji: String
         let color: UIColor
-        let daysCount: Int
+        let daysText: String
         let isCompletedForSelectedDate: Bool
         let canComplete: Bool
     }
@@ -102,7 +102,7 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel.text = viewModel.emoji
         cardView.backgroundColor = viewModel.color
         completeButton.tintColor = viewModel.color
-        daysLabel.text = daysCountText(viewModel.daysCount)
+        daysLabel.text = viewModel.daysText
         let image = viewModel.isCompletedForSelectedDate ? UIImage(resource: .doneButton) : UIImage(resource: .plusButton)
         completeButton.setImage(image, for: .normal)
         completeButton.alpha = viewModel.canComplete ? 1 : 0.3
@@ -154,16 +154,6 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
 
-    private func daysCountText(_ n: Int) -> String {
-        let mod10 = n % 10
-        let mod100 = n % 100
-        if (11...14).contains(mod100) { return "\(n) дней" }
-        switch mod10 {
-        case 1: return "\(n) день"
-        case 2, 3, 4: return "\(n) дня"
-        default: return "\(n) дней"
-        }
-    }
 }
 
 // MARK: - Constants

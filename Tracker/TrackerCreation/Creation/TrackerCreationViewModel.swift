@@ -2,6 +2,14 @@ import Foundation
 
 class TrackerCreationViewModel {
 
+    // MARK: - Dependencies
+    let categoryStore: TrackerCategoryStore
+
+    // MARK: - Init
+    init(categoryStore: TrackerCategoryStore) {
+        self.categoryStore = categoryStore
+    }
+
     // MARK: - State
     var trackerName: String = "" {
         didSet { onFormValidityChanged?(isFormValid) }

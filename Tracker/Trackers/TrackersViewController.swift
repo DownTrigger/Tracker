@@ -4,6 +4,7 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - ViewModel
     private let viewModel: TrackersViewModel
+    private let categoryStore: TrackerCategoryStore
 
     // MARK: - UI
     private lazy var searchController: UISearchController = {
@@ -53,8 +54,9 @@ final class TrackersViewController: UIViewController {
     }()
 
     // MARK: - Init
-    init(viewModel: TrackersViewModel) {
+    init(viewModel: TrackersViewModel, categoryStore: TrackerCategoryStore) {
         self.viewModel = viewModel
+        self.categoryStore = categoryStore
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -104,6 +106,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func setupUI() {
+        view.backgroundColor = AppColors.primaryBackground
         setupViewHierarchy()
         setupConstraints()
         updateEmptyStateVisibility()
@@ -123,10 +126,12 @@ final class TrackersViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.heightAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
             emptyStateImageView.widthAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
+              
             emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Constants.emptyStateSpacing),
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalPadding),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalPadding),
@@ -171,7 +176,7 @@ final class TrackersViewController: UIViewController {
     }
 
     @objc private func addTrackerTapped() {
-        let typeSelectionVC = TrackerTypeSelectionViewController()
+        let typeSelectionVC = TrackerTypeSelectionViewController(categoryStore: categoryStore)
         typeSelectionVC.onCreateTracker = { [weak self] tracker, categoryName in
             self?.addTracker(tracker, toCategoryWithTitle: categoryName)
         }
@@ -195,7 +200,6 @@ extension TrackersViewController: UICollectionViewDataSource {
             fatalError("Failed to dequeue \(TrackerCell.self). Check cell registration.")
         }
         let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
-        let days = viewModel.completedDaysCount(for: tracker.id)
         let isCompleted = viewModel.isCompletedToday(trackerId: tracker.id)
         let canComplete = viewModel.canComplete(for: viewModel.currentDate)
 
@@ -203,7 +207,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             name: tracker.name,
             emoji: tracker.emoji,
             color: TrackerColors.color(at: tracker.color),
-            daysCount: days,
+            daysText: viewModel.daysCountText(for: tracker.id),
             isCompletedForSelectedDate: isCompleted,
             canComplete: canComplete
         ))

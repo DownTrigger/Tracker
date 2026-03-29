@@ -144,7 +144,7 @@ class TrackerCreationViewController: UIViewController {
     func performCreate() {}
 
     func openCategories() {
-        let store = CoreDataStack.shared.categoryStore
+        let store = viewModel.categoryStore
         let preselected: TrackerCategory? = viewModel.selectedCategoryTitle.flatMap { title in
             store.categories.first { $0.title == title }
         }
@@ -397,13 +397,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        guard let sectionKind = Section(rawValue: section) else { return 0 }
-        switch sectionKind {
-        case .emoji, .color: return 0
-        default: return 0
-        }
-    }
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat { 0 }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if Section(rawValue: indexPath.section) == .emoji || Section(rawValue: indexPath.section) == .color {

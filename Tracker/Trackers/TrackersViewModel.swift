@@ -77,6 +77,18 @@ final class TrackersViewModel {
         completedRecords.filter { $0.trackerId == trackerId }.count
     }
 
+    func daysCountText(for trackerId: UUID) -> String {
+        let n = completedDaysCount(for: trackerId)
+        let mod10 = n % 10
+        let mod100 = n % 100
+        if (11...14).contains(mod100) { return "\(n) дней" }
+        switch mod10 {
+        case 1: return "\(n) день"
+        case 2, 3, 4: return "\(n) дня"
+        default: return "\(n) дней"
+        }
+    }
+
     func canComplete(for date: Date) -> Bool {
         !isFutureDate(date)
     }

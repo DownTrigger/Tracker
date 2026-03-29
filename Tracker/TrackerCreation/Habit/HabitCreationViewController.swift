@@ -6,8 +6,8 @@ final class HabitCreationViewController: TrackerCreationViewController {
     private let habitViewModel: HabitCreationViewModel
 
     // MARK: - Init
-    init() {
-        let vm = HabitCreationViewModel()
+    init(categoryStore: TrackerCategoryStore) {
+        let vm = HabitCreationViewModel(categoryStore: categoryStore)
         self.habitViewModel = vm
         super.init(viewModel: vm)
     }
@@ -48,7 +48,7 @@ final class HabitCreationViewController: TrackerCreationViewController {
             fatalError("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
         }
         cell.configure(title: Self.Strings.scheduleTitle, subtitle: scheduleSubtitle)
-        cell.accessoryType = .none
+        cell.accessoryType = .disclosureIndicator
         return cell
     }
 

@@ -40,9 +40,9 @@ final class CategoriesViewController: UIViewController {
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(Strings.addCategory, for: .normal)
-        button.setTitleColor(AppColors.accentWhite, for: .normal)
+        button.setTitleColor(AppColors.primaryBackground, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
-        button.backgroundColor = AppColors.accentBlack
+        button.backgroundColor = AppColors.primaryLabel
         button.layer.cornerRadius = Constants.buttonCornerRadius
         button.addTarget(self, action: #selector(addCategoryTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -72,6 +72,7 @@ final class CategoriesViewController: UIViewController {
         title = Strings.screenTitle
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
+        additionalSafeAreaInsets = UIEdgeInsets(top: -10, left: 0, bottom: 0, right: 0)
         setupViewHierarchy()
         setupConstraints()
         setupLongPress()

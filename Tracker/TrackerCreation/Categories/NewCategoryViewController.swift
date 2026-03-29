@@ -26,7 +26,7 @@ final class NewCategoryViewController: UIViewController {
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(Strings.done, for: .normal)
-        button.setTitleColor(AppColors.accentWhite, for: .normal)
+        button.setTitleColor(AppColors.primaryBackground, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
         button.layer.cornerRadius = Constants.buttonCornerRadius
         button.isEnabled = false
@@ -85,7 +85,7 @@ final class NewCategoryViewController: UIViewController {
     private func bindViewModel() {
         viewModel.onFormValidityChanged = { [weak self] isValid in
             self?.doneButton.isEnabled = isValid
-            self?.doneButton.backgroundColor = isValid ? AppColors.accentBlack : AppColors.accentGray
+            self?.doneButton.backgroundColor = isValid ? AppColors.primaryLabel : AppColors.accentGray
         }
     }
 

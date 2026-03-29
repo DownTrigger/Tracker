@@ -3,8 +3,8 @@ import UIKit
 final class IrregularEventCreationViewController: TrackerCreationViewController {
 
     // MARK: - Init
-    init() {
-        super.init(viewModel: TrackerCreationViewModel())
+    init(categoryStore: TrackerCategoryStore) {
+        super.init(viewModel: TrackerCreationViewModel(categoryStore: categoryStore))
     }
 
     required init?(coder: NSCoder) {
