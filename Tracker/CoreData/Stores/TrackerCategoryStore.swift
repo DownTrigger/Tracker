@@ -40,8 +40,34 @@ final class TrackerCategoryStore: NSObject {
     // MARK: - Private Methods
     private func makeCategory(from object: TrackerCategoryCD) -> TrackerCategory? {
         guard let title = object.title else { return nil }
-        let trackers = (object.trackers as? Set<TrackerCD>)?.compactMap { $0.toTracker() } ?? []
+        let trackers = (object.trackers as? Set<TrackerCD>)?
+            .compactMap { $0.toTracker() }
+            .sorted { $0.name < $1.name } ?? []
         return TrackerCategory(title: title, trackers: trackers)
+    }
+
+    // MARK: - Public Methods
+    func addCategory(name: String) {
+        let object = TrackerCategoryCD(context: context)
+        object.id = UUID()
+        object.title = name
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("TrackerCategoryStore: addCategory save failed: \(error)")
+        }
+    }
+
+    func deleteCategory(withTitle title: String) {
+        let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
+        request.predicate = NSPredicate(format: "title == %@", title)
+        do {
+            let objects = try context.fetch(request)
+            objects.forEach { context.delete($0) }
+            try context.save()
+        } catch {
+            assertionFailure("TrackerCategoryStore: deleteCategory failed: \(error)")
+        }
     }
 }
 

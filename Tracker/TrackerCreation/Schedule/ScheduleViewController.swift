@@ -3,13 +3,23 @@ import UIKit
 final class ScheduleViewController: UIViewController {
 
     // MARK: - State
-    var selectedWeekdays: Set<WeekDay> = []
+    private let viewModel: ScheduleViewModel
     var onComplete: ((Set<WeekDay>) -> Void)?
+
+    // MARK: - Init
+    init(viewModel: ScheduleViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     // MARK: - UI
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
-        table.delegate = self
         table.dataSource = self
         table.register(ScheduleDayCell.self, forCellReuseIdentifier: ScheduleDayCell.reuseId)
         table.backgroundColor = AppColors.primaryBackground
@@ -67,7 +77,7 @@ final class ScheduleViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func doneTapped() {
-        onComplete?(selectedWeekdays)
+        onComplete?(viewModel.selectedWeekdays)
         navigationController?.popViewController(animated: true)
     }
 }
@@ -80,27 +90,19 @@ extension ScheduleViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleDayCell.reuseId, for: indexPath) as? ScheduleDayCell else {
-            fatalError("Failed to dequeue \(ScheduleDayCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(ScheduleDayCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         let day = WeekDay.displayOrder[indexPath.row]
         cell.configure(
             title: day.fullTitle,
-            isOn: selectedWeekdays.contains(day),
-            onSwitchChanged: { [weak self] isOn in
-                if isOn {
-                    self?.selectedWeekdays.insert(day)
-                } else {
-                    self?.selectedWeekdays.remove(day)
-                }
+            isOn: viewModel.selectedWeekdays.contains(day),
+            onSwitchChanged: { [weak self] _ in
+                self?.viewModel.toggle(day)
             }
         )
         return cell
     }
-}
-
-// MARK: - UITableViewDelegate
-extension ScheduleViewController: UITableViewDelegate {
-    // TODO: No methods needed yet.
 }
 
 // MARK: - Constants

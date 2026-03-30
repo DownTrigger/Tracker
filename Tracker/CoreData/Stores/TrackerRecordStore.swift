@@ -54,13 +54,13 @@ final class TrackerRecordStore: NSObject {
         let request = NSFetchRequest<TrackerRecordCD>(entityName: "TrackerRecordCD")
         request.predicate = NSPredicate(format: "trackerId == %@", trackerId as CVarArg)
         let calendar = Calendar.current
-        ((try? context.fetch(request)) ?? [])
-            .filter { calendar.isDate($0.date ?? .distantPast, inSameDayAs: date) }
-            .forEach { context.delete($0) }
         do {
+            let objects = try context.fetch(request)
+            objects.filter { calendar.isDate($0.date ?? .distantPast, inSameDayAs: date) }
+                   .forEach { context.delete($0) }
             try context.save()
         } catch {
-            assertionFailure("TrackerRecordStore: deleteRecord save failed: \(error)")
+            assertionFailure("TrackerRecordStore: deleteRecord failed: \(error)")
         }
     }
 

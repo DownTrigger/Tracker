@@ -28,11 +28,12 @@ final class OnboardingPageViewController: UIViewController {
         self.pageIndex = pageIndex
         super.init(nibName: nil, bundle: nil)
         titleLabel.text = content.title
-        backgroundImageView.image = content.image
+        backgroundImageView.image = UIImage(resource: content.image)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - Lifecycle

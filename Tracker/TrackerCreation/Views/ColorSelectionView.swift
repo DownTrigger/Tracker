@@ -46,10 +46,6 @@ final class ColorSelectionView: UIView {
         collectionView.reloadData()
     }
 
-    var selectedIndex: Int {
-        selectedColorIndex
-    }
-
     static func preferredContentHeight(forWidth width: CGFloat) -> CGFloat {
         guard width > 0 else { return 3 * Constants.cellSizeMax + 2 * Constants.spacing }
         let columnCount = Constants.columnCount
@@ -84,7 +80,8 @@ extension ColorSelectionView: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.reuseId, for: indexPath) as? ColorCell else {
-            fatalError("Failed to dequeue ColorCell")
+            assertionFailure("Failed to dequeue ColorCell")
+            return UICollectionViewCell()
         }
         let color = TrackerColors.palette[indexPath.item]
         let isSelected = indexPath.item == selectedColorIndex
@@ -141,8 +138,9 @@ private final class ColorCell: UICollectionViewCell {
         setupConstraints()
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     override func layoutSubviews() {

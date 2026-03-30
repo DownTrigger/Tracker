@@ -10,22 +10,22 @@ final class TrackerCell: UICollectionViewCell {
         let name: String
         let emoji: String
         let color: UIColor
-        let daysCount: Int
+        let daysText: String
         let isCompletedForSelectedDate: Bool
-        let canComplete: Bool 
+        let canComplete: Bool
     }
 
     // MARK: - UI
     private let cardView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 16
+        view.layer.cornerRadius = Constants.cardCornerRadius
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
 
     private let emojiLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.font = UIFont.systemFont(ofSize: Constants.emojiFontSize)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -33,7 +33,7 @@ final class TrackerCell: UICollectionViewCell {
     private let emojiBackgroundView: UIView = {
         let view = UIView()
         view.backgroundColor = AppColors.primaryBackground.withAlphaComponent(0.3)
-        view.layer.cornerRadius = 12
+        view.layer.cornerRadius = Constants.emojiBackgroundCornerRadius
         view.clipsToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -41,7 +41,7 @@ final class TrackerCell: UICollectionViewCell {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: Constants.labelFontSize, weight: .medium)
         label.textColor = .white
         label.numberOfLines = 2
         label.textAlignment = .left
@@ -51,7 +51,7 @@ final class TrackerCell: UICollectionViewCell {
 
     private let daysLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: Constants.labelFontSize, weight: .medium)
         label.textColor = AppColors.primaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -59,7 +59,7 @@ final class TrackerCell: UICollectionViewCell {
 
     private let completeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.layer.cornerRadius = 17
+        button.layer.cornerRadius = Constants.completeButtonCornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -94,13 +94,15 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Callbacks
     var onCompleteTapped: (() -> Void)?
 
+    var previewView: UIView { cardView }
+
     // MARK: - Public
     func configure(viewModel: ViewModel) {
         titleLabel.text = viewModel.name
         emojiLabel.text = viewModel.emoji
         cardView.backgroundColor = viewModel.color
         completeButton.tintColor = viewModel.color
-        daysLabel.text = daysCountText(viewModel.daysCount)
+        daysLabel.text = viewModel.daysText
         let image = viewModel.isCompletedForSelectedDate ? UIImage(resource: .doneButton) : UIImage(resource: .plusButton)
         completeButton.setImage(image, for: .normal)
         completeButton.alpha = viewModel.canComplete ? 1 : 0.3
@@ -127,39 +129,45 @@ final class TrackerCell: UICollectionViewCell {
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
             cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            cardView.heightAnchor.constraint(equalToConstant: 90),
+            cardView.heightAnchor.constraint(equalToConstant: Constants.cardHeight),
 
-            emojiBackgroundView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
-            emojiBackgroundView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
-            emojiBackgroundView.widthAnchor.constraint(equalToConstant: 24),
-            emojiBackgroundView.heightAnchor.constraint(equalToConstant: 24),
+            emojiBackgroundView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: Constants.cardPadding),
+            emojiBackgroundView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: Constants.cardPadding),
+            emojiBackgroundView.widthAnchor.constraint(equalToConstant: Constants.emojiBackgroundSize),
+            emojiBackgroundView.heightAnchor.constraint(equalToConstant: Constants.emojiBackgroundSize),
 
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
 
-            titleLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
-            titleLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
-            titleLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
+            titleLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: Constants.cardPadding),
+            titleLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Constants.cardPadding),
+            titleLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -Constants.cardPadding),
 
-            completeButton.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 8),
-            completeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            completeButton.widthAnchor.constraint(equalToConstant: 34),
-            completeButton.heightAnchor.constraint(equalToConstant: 34),
+            completeButton.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: Constants.completeButtonTopSpacing),
+            completeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.cardPadding),
+            completeButton.widthAnchor.constraint(equalToConstant: Constants.completeButtonSize),
+            completeButton.heightAnchor.constraint(equalToConstant: Constants.completeButtonSize),
 
             daysLabel.centerYAnchor.constraint(equalTo: completeButton.centerYAnchor),
-            daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.cardPadding),
             daysLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
     }
 
-    private func daysCountText(_ n: Int) -> String {
-        let mod10 = n % 10
-        let mod100 = n % 100
-        if (11...14).contains(mod100) { return "\(n) дней" }
-        switch mod10 {
-        case 1: return "\(n) день"
-        case 2, 3, 4: return "\(n) дня"
-        default: return "\(n) дней"
-        }
+}
+
+// MARK: - Constants
+private extension TrackerCell {
+    enum Constants {
+        static let cardHeight: CGFloat = 90
+        static let cardCornerRadius: CGFloat = 16
+        static let cardPadding: CGFloat = 12
+        static let emojiBackgroundSize: CGFloat = 24
+        static let emojiBackgroundCornerRadius: CGFloat = 12
+        static let emojiFontSize: CGFloat = 14
+        static let labelFontSize: CGFloat = 12
+        static let completeButtonSize: CGFloat = 34
+        static let completeButtonCornerRadius: CGFloat = 17
+        static let completeButtonTopSpacing: CGFloat = 8
     }
 }
