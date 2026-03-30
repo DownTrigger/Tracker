@@ -10,8 +10,9 @@ final class OnboardingViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - UI
@@ -98,6 +99,10 @@ final class OnboardingViewController: UIViewController {
         viewModel.onCurrentPageChanged = { [weak self] index in
             self?.pageControl.currentPage = index
         }
+        viewModel.onCompleted = { [weak self] in
+            guard let window = self?.view.window else { return }
+            window.rootViewController = TabBarViewController()
+        }
     }
 
     // MARK: - Helpers
@@ -106,15 +111,9 @@ final class OnboardingViewController: UIViewController {
         return OnboardingPageViewController(content: content, pageIndex: index)
     }
 
-    private func showMainApp() {
-        viewModel.completeOnboarding()
-        guard let window = view.window else { return }
-        window.rootViewController = TabBarViewController()
-    }
-
     // MARK: - Actions
     @objc private func primaryButtonTapped() {
-        showMainApp()
+        viewModel.completeOnboarding()
     }
 }
 

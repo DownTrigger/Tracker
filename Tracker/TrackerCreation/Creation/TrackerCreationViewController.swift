@@ -15,8 +15,9 @@ class TrackerCreationViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     var trimmedName: String {
@@ -182,7 +183,8 @@ class TrackerCreationViewController: UIViewController {
 
     func dequeueNameCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TextFieldCell.reuseId, for: indexPath) as? TextFieldCell else {
-            fatalError("Failed to dequeue \(TextFieldCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(TextFieldCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         cell.configure(placeholder: Strings.namePlaceholder, currentText: viewModel.trackerName, onText: handleNameChange)
         cell.separatorInset = shouldShowNameLimitRow ? Constants.hiddenSeparatorInset : Constants.defaultSeparatorInset
@@ -191,7 +193,8 @@ class TrackerCreationViewController: UIViewController {
 
     func dequeueCategoryCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: SubtitleCell.reuseId, for: indexPath) as? SubtitleCell else {
-            fatalError("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         cell.configure(title: Strings.categoryTitle, subtitle: viewModel.selectedCategoryTitle ?? "")
         cell.accessoryType = .disclosureIndicator
@@ -211,7 +214,8 @@ class TrackerCreationViewController: UIViewController {
 
     func dequeueEmojiSectionCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: EmojiSectionCell.reuseId, for: indexPath) as? EmojiSectionCell else {
-            fatalError("Failed to dequeue \(EmojiSectionCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(EmojiSectionCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         cell.configure(onEmojiSelected: { [weak self] emoji in
             self?.viewModel.selectedEmoji = emoji
@@ -221,7 +225,8 @@ class TrackerCreationViewController: UIViewController {
 
     func dequeueColorSectionCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ColorSectionCell.reuseId, for: indexPath) as? ColorSectionCell else {
-            fatalError("Failed to dequeue \(ColorSectionCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(ColorSectionCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         cell.configure(onColorSelected: { [weak self] index in
             self?.viewModel.selectedColorIndex = index

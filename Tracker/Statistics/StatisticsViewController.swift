@@ -3,7 +3,18 @@ import UIKit
 final class StatisticsViewController: UIViewController {
 
     // MARK: - ViewModel
-    private let viewModel = StatisticsViewModel()
+    private let viewModel: StatisticsViewModel
+
+    // MARK: - Init
+    init(viewModel: StatisticsViewModel = StatisticsViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     // MARK: - UI
     private let emptyStateImageView: UIImageView = {

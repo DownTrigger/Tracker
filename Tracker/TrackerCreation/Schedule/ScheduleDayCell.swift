@@ -34,7 +34,8 @@ final class ScheduleDayCell: UITableViewCell {
         switchControl.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { nil }
 
     // MARK: - Private
     private func setupViewHierarchy() {

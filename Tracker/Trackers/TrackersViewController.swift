@@ -60,8 +60,9 @@ final class TrackersViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - Lifecycle
@@ -197,7 +198,8 @@ extension TrackersViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.reuseId, for: indexPath) as? TrackerCell else {
-            fatalError("Failed to dequeue \(TrackerCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(TrackerCell.self). Check cell registration.")
+            return UICollectionViewCell()
         }
         let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
         let isCompleted = viewModel.isCompletedToday(trackerId: tracker.id)
@@ -213,8 +215,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         ))
 
         cell.onCompleteTapped = { [weak self] in
-            guard let self else { return }
-            guard self.viewModel.canComplete(for: self.viewModel.currentDate) else { return }
+            guard let self, self.viewModel.canComplete(for: self.viewModel.currentDate) else { return }
             self.viewModel.toggleCompletion(trackerId: tracker.id)
         }
         return cell
@@ -233,7 +234,8 @@ extension TrackersViewController: UICollectionViewDataSource {
             withReuseIdentifier: TrackerSectionHeader.reuseId,
             for: indexPath
         ) as? TrackerSectionHeader else {
-            fatalError("Failed to dequeue \(TrackerSectionHeader.self). Check supplementary view registration.")
+            assertionFailure("Failed to dequeue \(TrackerSectionHeader.self). Check supplementary view registration.")
+            return UICollectionReusableView()
         }
         header.configure(title: viewModel.displayedCategories[indexPath.section].title)
         return header

@@ -7,8 +7,9 @@ final class IrregularEventCreationViewController: TrackerCreationViewController 
         super.init(viewModel: TrackerCreationViewModel(categoryStore: categoryStore))
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - Overrides

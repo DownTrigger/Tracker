@@ -80,7 +80,8 @@ extension EmojiSelectionView: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.reuseId, for: indexPath) as? EmojiCell else {
-            fatalError("Failed to dequeue EmojiCell")
+            assertionFailure("Failed to dequeue EmojiCell")
+            return UICollectionViewCell()
         }
         let emoji = TrackerEmojis.all[indexPath.item]
         cell.configure(emoji: emoji, isSelected: emoji == selectedEmoji)
@@ -132,8 +133,9 @@ private final class EmojiCell: UICollectionViewCell {
         setupConstraints()
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     override func layoutSubviews() {

@@ -12,8 +12,9 @@ final class ScheduleViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - UI
@@ -89,7 +90,8 @@ extension ScheduleViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleDayCell.reuseId, for: indexPath) as? ScheduleDayCell else {
-            fatalError("Failed to dequeue \(ScheduleDayCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(ScheduleDayCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         let day = WeekDay.displayOrder[indexPath.row]
         cell.configure(

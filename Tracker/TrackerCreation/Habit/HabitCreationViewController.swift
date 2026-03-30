@@ -12,8 +12,9 @@ final class HabitCreationViewController: TrackerCreationViewController {
         super.init(viewModel: vm)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     override var screenTitle: String { Self.Strings.screenTitle }
@@ -45,7 +46,8 @@ final class HabitCreationViewController: TrackerCreationViewController {
 
     private func dequeueScheduleCell(in tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: SubtitleCell.reuseId, for: indexPath) as? SubtitleCell else {
-            fatalError("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
+            assertionFailure("Failed to dequeue \(SubtitleCell.self). Check cell registration.")
+            return UITableViewCell()
         }
         cell.configure(title: Self.Strings.scheduleTitle, subtitle: scheduleSubtitle)
         cell.accessoryType = .disclosureIndicator

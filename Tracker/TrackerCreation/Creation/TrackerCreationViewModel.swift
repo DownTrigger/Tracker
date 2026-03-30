@@ -37,7 +37,7 @@ class TrackerCreationViewModel {
 
     // MARK: - Factory
     func buildTracker(schedule: [Int]) -> Tracker {
-        return Tracker.create(
+        Tracker.create(
             name: trackerName.trimmingCharacters(in: .whitespacesAndNewlines),
             schedule: schedule,
             emoji: selectedEmoji,

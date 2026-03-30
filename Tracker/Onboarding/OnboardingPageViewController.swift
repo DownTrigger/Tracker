@@ -31,8 +31,9 @@ final class OnboardingPageViewController: UIViewController {
         backgroundImageView.image = UIImage(resource: content.image)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - Lifecycle

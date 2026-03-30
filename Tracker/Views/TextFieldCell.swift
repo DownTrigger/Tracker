@@ -45,7 +45,8 @@ final class TextFieldCell: UITableViewCell {
         ])
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { nil }
 
     // MARK: - Public
     func configure(placeholder: String, currentText: String, onText: @escaping (String?) -> Void) {

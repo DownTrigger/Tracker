@@ -8,9 +8,14 @@ final class OnboardingViewModel {
 
     // MARK: - Bindings
     var onCurrentPageChanged: ((Int) -> Void)?
+    var onCompleted: (() -> Void)?
+
+    // MARK: - Dependencies
+    private let storage: OnboardingStorage
 
     // MARK: - Init
-    init() {
+    init(storage: OnboardingStorage = OnboardingStorage()) {
+        self.storage = storage
         pages = [
             PageContent(title: "Отслеживайте только то, что хотите", image: .blueBackground),
             PageContent(title: "Даже если это не литры воды и йога", image: .redBackground)
@@ -24,15 +29,7 @@ final class OnboardingViewModel {
     }
 
     func completeOnboarding() {
-        UserDefaults.standard.set(true, forKey: Constants.onboardingCompletedKey)
-    }
-
-    static func isCompleted() -> Bool {
-        UserDefaults.standard.bool(forKey: Constants.onboardingCompletedKey)
-    }
-
-    // MARK: - Constants
-    private enum Constants {
-        static let onboardingCompletedKey = "onboardingCompleted"
+        storage.markCompleted()
+        onCompleted?()
     }
 }

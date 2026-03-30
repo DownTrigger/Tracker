@@ -55,8 +55,9 @@ final class CategoriesViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - Lifecycle
@@ -164,7 +165,8 @@ extension CategoriesViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.reuseId, for: indexPath) as? CategoryCell else {
-            fatalError("Failed to dequeue CategoryCell")
+            assertionFailure("Failed to dequeue CategoryCell")
+            return UITableViewCell()
         }
         let category = viewModel.categories[indexPath.row]
         let isSelected = viewModel.selectedCategory?.title == category.title
