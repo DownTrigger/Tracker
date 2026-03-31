@@ -14,6 +14,7 @@ final class TrackersViewModel {
     private(set) var currentDate: Date = Date()
     private var searchText: String = ""
     private var completedIdsForDate: Set<UUID> = []
+    private(set) var activeFilter: TrackerFilter = .all
 
     // MARK: - Dependencies
     private let categoryStore: TrackerCategoryStore
@@ -38,6 +39,15 @@ final class TrackersViewModel {
 
     func setSearchText(_ text: String) {
         searchText = text
+        rebuild()
+        onDataUpdated?()
+    }
+
+    func setFilter(_ filter: TrackerFilter) {
+        activeFilter = filter
+        if filter == .today {
+            currentDate = Date()
+        }
         rebuild()
         onDataUpdated?()
     }
@@ -100,6 +110,13 @@ final class TrackersViewModel {
         !isFutureDate(date)
     }
 
+    var hasTrackersForCurrentDate: Bool {
+        let weekday = Calendar.current.component(.weekday, from: currentDate)
+        return allCategories.contains { category in
+            category.trackers.contains { $0.schedule.contains(weekday) }
+        }
+    }
+
     // MARK: - Private
     private func loadData() {
         allCategories = categoryStore.categories
@@ -145,9 +162,12 @@ final class TrackersViewModel {
                 )
             }.filter { !$0.trackers.isEmpty }
         }
+        result = applyFilter(to: result)
+
         let pinnedTrackers = allCategories
             .flatMap { $0.trackers }
             .filter { $0.isPinned && $0.schedule.contains(weekday) }
+            .filter { applyFilterToTracker($0) }
         if !pinnedTrackers.isEmpty {
             let pinnedCategory = TrackerCategory(title: Constants.pinnedCategoryTitle, trackers: pinnedTrackers)
             result.insert(pinnedCategory, at: 0)
@@ -162,6 +182,24 @@ final class TrackersViewModel {
                 .filter { calendar.isDate($0.date, inSameDayAs: currentDate) }
                 .map(\.trackerId)
         )
+    }
+
+    private func applyFilter(to categories: [TrackerCategory]) -> [TrackerCategory] {
+        guard activeFilter == .completed || activeFilter == .notCompleted else { return categories }
+        return categories.map { category in
+            TrackerCategory(
+                title: category.title,
+                trackers: category.trackers.filter { applyFilterToTracker($0) }
+            )
+        }.filter { !$0.trackers.isEmpty }
+    }
+
+    private func applyFilterToTracker(_ tracker: Tracker) -> Bool {
+        switch activeFilter {
+        case .all, .today: return true
+        case .completed: return completedIdsForDate.contains(tracker.id)
+        case .notCompleted: return !completedIdsForDate.contains(tracker.id)
+        }
     }
 
     private func isFutureDate(_ date: Date) -> Bool {

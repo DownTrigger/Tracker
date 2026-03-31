@@ -46,11 +46,21 @@ final class TrackersViewController: UIViewController {
 
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = Strings.emptyStateText
         label.font = UIFont.systemFont(ofSize: Constants.emptyStateFontSize)
         label.textAlignment = .center
         label.numberOfLines = 0
         return label
+    }()
+
+    private lazy var filtersButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(Strings.filtersButton, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: Constants.filterButtonFontSize)
+        button.backgroundColor = AppColors.accentBlue
+        button.layer.cornerRadius = Constants.filterButtonCornerRadius
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
 
     // MARK: - Init
@@ -110,6 +120,7 @@ final class TrackersViewController: UIViewController {
         view.backgroundColor = AppColors.primaryBackground
         setupViewHierarchy()
         setupConstraints()
+        collectionView.contentInset.bottom = Constants.filterButtonHeight + Constants.filterButtonBottomSpacing * 2
         updateEmptyStateVisibility()
     }
 
@@ -117,6 +128,7 @@ final class TrackersViewController: UIViewController {
         view.addSubview(collectionView)
         view.addSubview(emptyStateImageView)
         view.addSubview(emptyStateLabel)
+        view.addSubview(filtersButton)
         emptyStateImageView.translatesAutoresizingMaskIntoConstraints = false
         emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
     }
@@ -127,16 +139,21 @@ final class TrackersViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
+
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.heightAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
             emptyStateImageView.widthAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
-              
+
             emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Constants.emptyStateSpacing),
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalPadding),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalPadding),
-            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+
+            filtersButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.filterButtonBottomSpacing),
+            filtersButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filtersButton.widthAnchor.constraint(equalToConstant: Constants.filterButtonWidth),
+            filtersButton.heightAnchor.constraint(equalToConstant: Constants.filterButtonHeight)
         ])
     }
 
@@ -144,6 +161,7 @@ final class TrackersViewController: UIViewController {
         customDatePicker.onDateChanged = { [weak self] date in
             self?.viewModel.setDate(date)
         }
+        filtersButton.addTarget(self, action: #selector(filtersButtonTapped), for: .touchUpInside)
     }
 
     private func bindViewModel() {
@@ -155,10 +173,26 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - Helpers
     private func updateEmptyStateVisibility() {
-        let hasTrackersToShow = viewModel.displayedCategories.contains { !$0.trackers.isEmpty }
-        emptyStateImageView.isHidden = hasTrackersToShow
-        emptyStateLabel.isHidden = hasTrackersToShow
-        collectionView.isHidden = !hasTrackersToShow
+        let hasDisplayed = viewModel.displayedCategories.contains { !$0.trackers.isEmpty }
+        let hasForDate = viewModel.hasTrackersForCurrentDate
+
+        if hasDisplayed {
+            emptyStateImageView.isHidden = true
+            emptyStateLabel.isHidden = true
+            collectionView.isHidden = false
+        } else if hasForDate {
+            emptyStateImageView.isHidden = false
+            emptyStateLabel.isHidden = false
+            emptyStateLabel.text = Strings.nothingFoundText
+            collectionView.isHidden = true
+        } else {
+            emptyStateImageView.isHidden = false
+            emptyStateLabel.isHidden = false
+            emptyStateLabel.text = Strings.emptyStateText
+            collectionView.isHidden = true
+        }
+
+        filtersButton.isHidden = !hasForDate
     }
 
     // MARK: - Actions
@@ -182,6 +216,20 @@ final class TrackersViewController: UIViewController {
             self?.addTracker(tracker, toCategoryWithTitle: categoryName)
         }
         let nav = UINavigationController(rootViewController: typeSelectionVC)
+        present(nav, animated: true)
+    }
+
+    @objc private func filtersButtonTapped() {
+        let filtersVM = FiltersViewModel(activeFilter: viewModel.activeFilter)
+        let filtersVC = FiltersViewController(viewModel: filtersVM)
+        filtersVC.onFilterSelected = { [weak self] filter in
+            guard let self else { return }
+            self.viewModel.setFilter(filter)
+            if filter == .today {
+                self.customDatePicker.date = Date()
+            }
+        }
+        let nav = UINavigationController(rootViewController: filtersVC)
         present(nav, animated: true)
     }
 }
@@ -320,12 +368,21 @@ private extension TrackersViewController {
         static let addButtonContainerHeight: CGFloat = 44
         static let addButtonSize: CGFloat = 44
         static let addButtonLeadingOffset: CGFloat = -12
+
+        // MARK: - Filters button
+        static let filterButtonWidth: CGFloat = 114
+        static let filterButtonHeight: CGFloat = 50
+        static let filterButtonBottomSpacing: CGFloat = 16
+        static let filterButtonCornerRadius: CGFloat = 16
+        static let filterButtonFontSize: CGFloat = 17
     }
 
     enum Strings {
         static let screenTitle = "title_trackers".localized
         static let searchPlaceholder = "search_placeholder_trackers".localized
         static let emptyStateText = "empty_state_trackers".localized
+        static let nothingFoundText = "empty_state_nothing_found".localized
+        static let filtersButton = "button_filters".localized
         static let pin = "context_menu_pin".localized
         static let unpin = "context_menu_unpin".localized
         static let edit = "context_menu_edit".localized
