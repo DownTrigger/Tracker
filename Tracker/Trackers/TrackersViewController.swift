@@ -211,7 +211,8 @@ extension TrackersViewController: UICollectionViewDataSource {
             color: TrackerColors.color(at: tracker.color),
             daysText: viewModel.daysCountText(for: tracker.id),
             isCompletedForSelectedDate: isCompleted,
-            canComplete: canComplete
+            canComplete: canComplete,
+            isPinned: tracker.isPinned
         ))
 
         cell.onCompleteTapped = { [weak self] in
@@ -249,9 +250,17 @@ extension TrackersViewController: UICollectionViewDelegate {
         contextMenuConfigurationForItemAt indexPath: IndexPath,
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
-        UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+        let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
+        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
-            let pin = UIAction(title: Strings.pin) { _ in }
+            let pinTitle = tracker.isPinned ? Strings.unpin : Strings.pin
+            let pin = UIAction(title: pinTitle) { [weak self] _ in
+                if tracker.isPinned {
+                    self?.viewModel.unpinTracker(id: tracker.id)
+                } else {
+                    self?.viewModel.pinTracker(id: tracker.id)
+                }
+            }
             let edit = UIAction(title: Strings.edit) { _ in }
             let delete = UIAction(title: Strings.delete, attributes: .destructive) { [weak self] _ in
                 self?.showDeleteConfirmation(for: indexPath)
@@ -318,6 +327,7 @@ private extension TrackersViewController {
         static let searchPlaceholder = "search_placeholder_trackers".localized
         static let emptyStateText = "empty_state_trackers".localized
         static let pin = "context_menu_pin".localized
+        static let unpin = "context_menu_unpin".localized
         static let edit = "context_menu_edit".localized
         static let delete = "context_menu_delete".localized
         static let deleteConfirmation = "alert_delete_tracker".localized

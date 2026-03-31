@@ -154,6 +154,23 @@
         }
       }
     },
+    "category_pinned" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закреплено"
+          }
+        }
+      }
+    },
     "context_menu_delete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -201,6 +218,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Закрепить"
+          }
+        }
+      }
+    },
+    "context_menu_unpin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpin"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открепить"
           }
         }
       }

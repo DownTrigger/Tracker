@@ -9,7 +9,8 @@ extension Tracker {
             name: name,
             color: colorIndex,
             emoji: emoji,
-            schedule: schedule
+            schedule: schedule,
+            isPinned: false
         )
     }
 }

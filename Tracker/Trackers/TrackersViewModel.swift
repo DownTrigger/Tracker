@@ -50,6 +50,20 @@ final class TrackersViewModel {
         }
     }
 
+    func pinTracker(id: UUID) {
+        trackerStore.pinTracker(id: id, isPinned: true)
+        allCategories = categoryStore.categories
+        rebuild()
+        onDataUpdated?()
+    }
+
+    func unpinTracker(id: UUID) {
+        trackerStore.pinTracker(id: id, isPinned: false)
+        allCategories = categoryStore.categories
+        rebuild()
+        onDataUpdated?()
+    }
+
     func deleteTracker(id: UUID) {
         trackerStore.deleteTracker(id: id)
         allCategories = categoryStore.categories
@@ -118,7 +132,7 @@ final class TrackersViewModel {
         var result = allCategories.map { category in
             TrackerCategory(
                 title: category.title,
-                trackers: category.trackers.filter { $0.schedule.contains(weekday) }
+                trackers: category.trackers.filter { $0.schedule.contains(weekday) && !$0.isPinned }
             )
         }.filter { !$0.trackers.isEmpty }
         if !searchText.isEmpty {
@@ -130,6 +144,13 @@ final class TrackersViewModel {
                     }
                 )
             }.filter { !$0.trackers.isEmpty }
+        }
+        let pinnedTrackers = allCategories
+            .flatMap { $0.trackers }
+            .filter { $0.isPinned && $0.schedule.contains(weekday) }
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategory = TrackerCategory(title: Constants.pinnedCategoryTitle, trackers: pinnedTrackers)
+            result.insert(pinnedCategory, at: 0)
         }
         displayedCategories = result
     }
@@ -145,5 +166,12 @@ final class TrackersViewModel {
 
     private func isFutureDate(_ date: Date) -> Bool {
         Calendar.current.compare(date, to: Date(), toGranularity: .day) == .orderedDescending
+    }
+}
+
+// MARK: - Constants
+private extension TrackersViewModel {
+    enum Constants {
+        static let pinnedCategoryTitle = "category_pinned".localized
     }
 }

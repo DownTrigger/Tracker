@@ -13,6 +13,7 @@ final class TrackerCell: UICollectionViewCell {
         let daysText: String
         let isCompletedForSelectedDate: Bool
         let canComplete: Bool
+        let isPinned: Bool
     }
 
     // MARK: - UI
@@ -57,6 +58,13 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
 
+    private let pinImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.image = UIImage(resource: .pin)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
     private let completeButton: UIButton = {
         let button = UIButton(type: .system)
         button.layer.cornerRadius = Constants.completeButtonCornerRadius
@@ -88,6 +96,7 @@ final class TrackerCell: UICollectionViewCell {
         cardView.backgroundColor = nil
         completeButton.backgroundColor = nil
         completeButton.setImage(nil, for: .normal)
+        pinImageView.isHidden = true
         onCompleteTapped = nil
     }
 
@@ -107,6 +116,7 @@ final class TrackerCell: UICollectionViewCell {
         completeButton.setImage(image, for: .normal)
         completeButton.alpha = viewModel.canComplete ? 1 : 0.3
         completeButton.isEnabled = viewModel.canComplete
+        pinImageView.isHidden = !viewModel.isPinned
     }
 
     // MARK: - Actions
@@ -120,6 +130,7 @@ final class TrackerCell: UICollectionViewCell {
         cardView.addSubview(emojiBackgroundView)
         cardView.addSubview(emojiLabel)
         cardView.addSubview(titleLabel)
+        cardView.addSubview(pinImageView)
         contentView.addSubview(daysLabel)
         contentView.addSubview(completeButton)
     }
@@ -150,7 +161,12 @@ final class TrackerCell: UICollectionViewCell {
 
             daysLabel.centerYAnchor.constraint(equalTo: completeButton.centerYAnchor),
             daysLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.cardPadding),
-            daysLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            daysLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+
+            pinImageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: Constants.cardPadding),
+            pinImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Constants.pinPadding),
+            pinImageView.widthAnchor.constraint(equalToConstant: Constants.pinIconSize),
+            pinImageView.heightAnchor.constraint(equalToConstant: Constants.pinIconSize)
         ])
     }
 
@@ -162,6 +178,7 @@ private extension TrackerCell {
         static let cardHeight: CGFloat = 90
         static let cardCornerRadius: CGFloat = 16
         static let cardPadding: CGFloat = 12
+        static let pinPadding: CGFloat = 4
         static let emojiBackgroundSize: CGFloat = 24
         static let emojiBackgroundCornerRadius: CGFloat = 12
         static let emojiFontSize: CGFloat = 14
@@ -169,5 +186,6 @@ private extension TrackerCell {
         static let completeButtonSize: CGFloat = 34
         static let completeButtonCornerRadius: CGFloat = 17
         static let completeButtonTopSpacing: CGFloat = 8
+        static let pinIconSize: CGFloat = 24
     }
 }

@@ -25,7 +25,7 @@ final class CategoriesViewModel {
 
     // MARK: - Data
     func reloadCategories() {
-        categories = store.categories
+        categories = store.categories.filter { $0.title != Constants.pinnedCategoryTitle }
         onCategoriesUpdated?(categories)
     }
 
@@ -43,5 +43,12 @@ final class CategoriesViewModel {
     func deleteCategory(at index: Int) {
         guard index < categories.count else { return }
         store.deleteCategory(withTitle: categories[index].title)
+    }
+}
+
+// MARK: - Constants
+private extension CategoriesViewModel {
+    enum Constants {
+        static let pinnedCategoryTitle = "category_pinned".localized
     }
 }
