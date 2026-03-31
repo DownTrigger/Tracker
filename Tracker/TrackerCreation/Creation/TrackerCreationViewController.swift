@@ -298,14 +298,14 @@ private extension TrackerCreationViewController {
 
     enum Strings {
         // MARK: - Buttons
-        static let cancel = "Отменить"
-        static let create = "Создать"
+        static let cancel = "button_cancel".localized
+        static let create = "button_create".localized
 
         // MARK: - Labels & placeholders
-        static let namePlaceholder = "Введите название трекера"
-        static let categoryTitle = "Категория"
-        static let emojiSectionTitle = "Emoji"
-        static let colorSectionTitle = "Цвет"
+        static let namePlaceholder = "placeholder_tracker_name".localized
+        static let categoryTitle = "title_category".localized
+        static let emojiSectionTitle = "section_title_emoji".localized
+        static let colorSectionTitle = "section_title_color".localized
     }
 }
 

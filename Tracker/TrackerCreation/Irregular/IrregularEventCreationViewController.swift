@@ -28,6 +28,6 @@ final class IrregularEventCreationViewController: TrackerCreationViewController 
 // MARK: - Strings
 private extension IrregularEventCreationViewController {
     enum Strings {
-        static let screenTitle = "Новое нерегулярное событие"
+        static let screenTitle = "title_new_irregular_event".localized
     }
 }

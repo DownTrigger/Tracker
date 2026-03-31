@@ -87,7 +87,7 @@ private extension HabitCreationViewController {
 // MARK: - Strings
 private extension HabitCreationViewController {
     enum Strings {
-        static let screenTitle = "Новая привычка"
-        static let scheduleTitle = "Расписание"
+        static let screenTitle = "title_new_habit".localized
+        static let scheduleTitle = "title_schedule".localized
     }
 }

@@ -5,7 +5,7 @@ final class TextFieldCell: UITableViewCell {
     // MARK: - Constants
     static let reuseId = "TextFieldCell"
     static let maxNameLength = 38
-    static let nameLimitFooterText = "Ограничение 38 символов"
+    static let nameLimitFooterText = "tracker_name_limit".localized
     static let nameLimitCellReuseId = "NameLimitCell"
 
     // MARK: - UI

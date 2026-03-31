@@ -314,13 +314,13 @@ private extension TrackersViewController {
     }
 
     enum Strings {
-        static let screenTitle = "Трекеры"
-        static let searchPlaceholder = "Поиск"
-        static let emptyStateText = "Что будем отслеживать?"
-        static let pin = "Закрепить"
-        static let edit = "Редактировать"
-        static let delete = "Удалить"
-        static let deleteConfirmation = "Уверены что хотите удалить трекер?"
-        static let cancel = "Отменить"
+        static let screenTitle = "title_trackers".localized
+        static let searchPlaceholder = "search_placeholder_trackers".localized
+        static let emptyStateText = "empty_state_trackers".localized
+        static let pin = "context_menu_pin".localized
+        static let edit = "context_menu_edit".localized
+        static let delete = "context_menu_delete".localized
+        static let deleteConfirmation = "alert_delete_tracker".localized
+        static let cancel = "button_cancel".localized
     }
 }

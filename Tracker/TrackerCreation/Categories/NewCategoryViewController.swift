@@ -118,8 +118,8 @@ private extension NewCategoryViewController {
     }
 
     enum Strings {
-        static let screenTitle = "Новая категория"
-        static let placeholder = "Введите название категории"
-        static let done = "Готово"
+        static let screenTitle = "title_new_category".localized
+        static let placeholder = "placeholder_category_name".localized
+        static let done = "button_done".localized
     }
 }

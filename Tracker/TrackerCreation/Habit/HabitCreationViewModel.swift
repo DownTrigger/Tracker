@@ -21,7 +21,7 @@ final class HabitCreationViewModel: TrackerCreationViewModel {
     var scheduleSubtitle: String {
         if selectedWeekdays.isEmpty { return "" }
         let sorted = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }
-        if sorted.count == 7 { return "Каждый день" }
+        if sorted.count == 7 { return "schedule_every_day".localized }
         return sorted.map { $0.shortTitle }.joined(separator: ", ")
     }
 

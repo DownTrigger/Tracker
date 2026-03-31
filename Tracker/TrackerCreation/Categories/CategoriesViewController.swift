@@ -199,11 +199,11 @@ private extension CategoriesViewController {
     }
 
     enum Strings {
-        static let screenTitle = "Категория"
-        static let addCategory = "Добавить категорию"
-        static let emptyState = "Привычки и события можно\nобъединить по смыслу"
-        static let delete = "Удалить"
-        static let deleteConfirmation = "Эта категория точно не нужна?"
-        static let cancel = "Отменить"
+        static let screenTitle = "title_category".localized
+        static let addCategory = "button_add_category".localized
+        static let emptyState = "empty_state_categories".localized
+        static let delete = "button_delete".localized
+        static let deleteConfirmation = "alert_delete_category".localized
+        static let cancel = "button_cancel".localized
     }
 }

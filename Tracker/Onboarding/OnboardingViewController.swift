@@ -170,6 +170,6 @@ private extension OnboardingViewController {
     }
 
     enum Strings {
-        static let primaryButtonTitle = "Вот это технологии!"
+        static let primaryButtonTitle = "onboarding_button_title".localized
     }
 }

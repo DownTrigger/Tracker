@@ -17,8 +17,8 @@ final class OnboardingViewModel {
     init(storage: OnboardingStorage = OnboardingStorage()) {
         self.storage = storage
         pages = [
-            PageContent(title: "Отслеживайте только то, что хотите", image: .blueBackground),
-            PageContent(title: "Даже если это не литры воды и йога", image: .redBackground)
+            PageContent(title: "onboarding_page1_title".localized, image: .blueBackground),
+            PageContent(title: "onboarding_page2_title".localized, image: .redBackground)
         ]
     }
 
