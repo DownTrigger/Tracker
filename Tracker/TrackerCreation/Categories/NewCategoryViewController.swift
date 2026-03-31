@@ -36,9 +36,13 @@ final class NewCategoryViewController: UIViewController {
         return button
     }()
 
+    // MARK: - State
+    private let initialName: String?
+
     // MARK: - Init
-    init(viewModel: NewCategoryViewModel = NewCategoryViewModel()) {
+    init(viewModel: NewCategoryViewModel = NewCategoryViewModel(), initialName: String? = nil) {
         self.viewModel = viewModel
+        self.initialName = initialName
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -52,11 +56,15 @@ final class NewCategoryViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
+        if let name = initialName {
+            textField.text = name
+            viewModel.name = name
+        }
     }
 
     // MARK: - Setup
     private func setupUI() {
-        title = Strings.screenTitle
+        title = initialName == nil ? Strings.screenTitle : Strings.editScreenTitle
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         setupViewHierarchy()
@@ -119,6 +127,7 @@ private extension NewCategoryViewController {
 
     enum Strings {
         static let screenTitle = "title_new_category".localized
+        static let editScreenTitle = "title_edit_category".localized
         static let placeholder = "placeholder_category_name".localized
         static let done = "button_done".localized
     }

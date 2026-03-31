@@ -720,6 +720,23 @@
         }
       }
     },
+    "title_edit_category" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing category"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактирование категории"
+          }
+        }
+      }
+    },
     "title_edit_habit" : {
       "extractionState" : "manual",
       "localizations" : {

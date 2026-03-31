@@ -40,6 +40,11 @@ final class CategoriesViewModel {
         store.addCategory(name: name)
     }
 
+    func renameCategory(at index: Int, newName: String) {
+        guard index < categories.count else { return }
+        store.renameCategory(oldTitle: categories[index].title, newTitle: newName)
+    }
+
     func deleteCategory(at index: Int) {
         guard index < categories.count else { return }
         store.deleteCategory(withTitle: categories[index].title)

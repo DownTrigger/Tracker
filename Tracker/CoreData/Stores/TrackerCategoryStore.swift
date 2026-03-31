@@ -58,6 +58,18 @@ final class TrackerCategoryStore: NSObject {
         }
     }
 
+    func renameCategory(oldTitle: String, newTitle: String) {
+        let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
+        request.predicate = NSPredicate(format: "title == %@", oldTitle)
+        do {
+            guard let object = try context.fetch(request).first else { return }
+            object.title = newTitle
+            try context.save()
+        } catch {
+            assertionFailure("TrackerCategoryStore: renameCategory failed: \(error)")
+        }
+    }
+
     func deleteCategory(withTitle title: String) {
         let request = NSFetchRequest<TrackerCategoryCD>(entityName: "TrackerCategoryCD")
         request.predicate = NSPredicate(format: "title == %@", title)
