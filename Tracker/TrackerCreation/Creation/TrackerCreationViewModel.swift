@@ -10,6 +10,15 @@ class TrackerCreationViewModel {
         self.categoryStore = categoryStore
     }
 
+    // MARK: - Editing
+    var isEditing: Bool = false
+
+    var createButtonTitle: String {
+        isEditing ? "button_save".localized : "button_create".localized
+    }
+
+    var completedDays: Int { 0 }
+
     // MARK: - State
     var trackerName: String = "" {
         didSet { onFormValidityChanged?(isFormValid) }

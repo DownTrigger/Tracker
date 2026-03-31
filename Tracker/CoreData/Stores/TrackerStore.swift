@@ -36,6 +36,20 @@ final class TrackerStore {
         }
     }
 
+    func updateTracker(_ tracker: Tracker, toCategoryWithTitle title: String) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        guard let object = try context.fetch(request).first else { return }
+        let category = findOrCreateCategory(title: title)
+        object.name = tracker.name
+        object.color = Int16(tracker.color)
+        object.emoji = tracker.emoji
+        object.schedule = try JSONEncoder().encode(tracker.schedule)
+        object.isPinned = tracker.isPinned
+        object.category = category
+        try context.save()
+    }
+
     func deleteTracker(id: UUID) {
         let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)

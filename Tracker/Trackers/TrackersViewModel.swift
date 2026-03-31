@@ -81,6 +81,25 @@ final class TrackersViewModel {
         onDataUpdated?()
     }
 
+    func editTracker(_ tracker: Tracker, categoryName: String) {
+        do {
+            try trackerStore.updateTracker(tracker, toCategoryWithTitle: categoryName)
+            allCategories = categoryStore.categories
+            rebuild()
+            onDataUpdated?()
+        } catch {
+            assertionFailure("TrackersViewModel: editTracker failed: \(error)")
+        }
+    }
+
+    func completedCount(for trackerId: UUID) -> Int {
+        completedRecords.filter { $0.trackerId == trackerId }.count
+    }
+
+    func categoryName(for trackerId: UUID) -> String {
+        allCategories.first { $0.trackers.contains { $0.id == trackerId } }?.title ?? ""
+    }
+
     func addTracker(_ tracker: Tracker, categoryName: String) {
         do {
             try trackerStore.addTracker(tracker, toCategoryWithTitle: categoryName)

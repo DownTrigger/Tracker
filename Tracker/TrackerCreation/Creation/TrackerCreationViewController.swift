@@ -63,9 +63,18 @@ class TrackerCreationViewController: UIViewController {
         return button
     }()
 
+    private lazy var daysCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: Constants.daysCountFontSize, weight: .bold)
+        label.textColor = AppColors.primaryLabel
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(Strings.create, for: .normal)
+        button.setTitle(viewModel.createButtonTitle, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
         button.backgroundColor = AppColors.primaryLabel
         button.setTitleColor(AppColors.primaryBackground, for: .normal)
@@ -106,6 +115,10 @@ class TrackerCreationViewController: UIViewController {
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         additionalSafeAreaInsets = Constants.additionalSafeAreaInsets
+        createButton.setTitle(viewModel.createButtonTitle, for: .normal)
+        if viewModel.isEditing {
+            daysCountLabel.text = String(format: "days_count".localized, viewModel.completedDays)
+        }
         setupViewHierarchy()
         setupConstraints()
     }
@@ -115,11 +128,23 @@ class TrackerCreationViewController: UIViewController {
         view.addSubview(buttonStack)
         buttonStack.addArrangedSubview(cancelButton)
         buttonStack.addArrangedSubview(createButton)
+        if viewModel.isEditing {
+            view.addSubview(daysCountLabel)
+        }
     }
 
     private func setupConstraints() {
+        if viewModel.isEditing {
+            NSLayoutConstraint.activate([
+                daysCountLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.daysCountTopPadding),
+                daysCountLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                daysCountLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                tableView.topAnchor.constraint(equalTo: daysCountLabel.bottomAnchor, constant: Constants.daysCountBottomPadding)
+            ])
+        } else {
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        }
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -Constants.tableViewBottomPadding),
@@ -294,6 +319,10 @@ private extension TrackerCreationViewController {
         static let emojiSectionVerticalInsetTotal: CGFloat = 48
         static let colorSectionVerticalInsetTotal: CGFloat = 48
 
+        // MARK: - Days count label
+        static let daysCountFontSize: CGFloat = 32
+        static let daysCountTopPadding: CGFloat = 24
+        static let daysCountBottomPadding: CGFloat = 8
     }
 
     enum Strings {

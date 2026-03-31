@@ -219,6 +219,22 @@ final class TrackersViewController: UIViewController {
         present(nav, animated: true)
     }
 
+    private func showEditTracker(_ tracker: Tracker) {
+        let completedDays = viewModel.completedCount(for: tracker.id)
+        let categoryName = viewModel.categoryName(for: tracker.id)
+        let editVC = HabitCreationViewController(
+            tracker: tracker,
+            completedDays: completedDays,
+            categoryName: categoryName,
+            categoryStore: categoryStore
+        )
+        editVC.onCreateTracker = { [weak self] updatedTracker, updatedCategoryName in
+            self?.viewModel.editTracker(updatedTracker, categoryName: updatedCategoryName)
+        }
+        let nav = UINavigationController(rootViewController: editVC)
+        present(nav, animated: true)
+    }
+
     @objc private func filtersButtonTapped() {
         let filtersVM = FiltersViewModel(activeFilter: viewModel.activeFilter)
         let filtersVC = FiltersViewController(viewModel: filtersVM)
@@ -309,7 +325,9 @@ extension TrackersViewController: UICollectionViewDelegate {
                     self?.viewModel.pinTracker(id: tracker.id)
                 }
             }
-            let edit = UIAction(title: Strings.edit) { _ in }
+            let edit = UIAction(title: Strings.edit) { [weak self] _ in
+                self?.showEditTracker(tracker)
+            }
             let delete = UIAction(title: Strings.delete, attributes: .destructive) { [weak self] _ in
                 self?.showDeleteConfirmation(for: indexPath)
             }
