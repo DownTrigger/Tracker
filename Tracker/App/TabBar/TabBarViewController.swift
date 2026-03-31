@@ -43,7 +43,8 @@ final class TabBarViewController: UITabBarController {
             selectedImage: nil
         )
 
-        let statisticsViewController = StatisticsViewController()
+        let statisticsViewModel = StatisticsViewModel(recordStore: stack.recordStore, categoryStore: stack.categoryStore)
+        let statisticsViewController = StatisticsViewController(viewModel: statisticsViewModel)
         let statisticsNavController = UINavigationController(rootViewController: statisticsViewController)
         statisticsViewController.tabBarItem = UITabBarItem(
             title: "tab_statistics".localized,

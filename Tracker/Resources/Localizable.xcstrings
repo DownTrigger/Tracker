@@ -703,6 +703,50 @@
         }
       }
     },
+    "stat_best_period" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Best period" }
+        },
+        "ru" : {
+          "stringUnit" : { "state" : "translated", "value" : "Лучший период" }
+        }
+      }
+    },
+    "stat_ideal_days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Ideal days" }
+        },
+        "ru" : {
+          "stringUnit" : { "state" : "translated", "value" : "Идеальные дни" }
+        }
+      }
+    },
+    "stat_completed_trackers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Trackers completed" }
+        },
+        "ru" : {
+          "stringUnit" : { "state" : "translated", "value" : "Трекеров завершено" }
+        }
+      }
+    },
+    "stat_average_per_day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Average value" }
+        },
+        "ru" : {
+          "stringUnit" : { "state" : "translated", "value" : "Среднее значение" }
+        }
+      }
+    },
     "button_save" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -6,7 +6,7 @@ final class StatisticsViewController: UIViewController {
     private let viewModel: StatisticsViewModel
 
     // MARK: - Init
-    init(viewModel: StatisticsViewModel = StatisticsViewModel()) {
+    init(viewModel: StatisticsViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -34,12 +34,31 @@ final class StatisticsViewController: UIViewController {
         return label
     }()
 
+    private let bestPeriodCard = StatisticCardView()
+    private let idealDaysCard = StatisticCardView()
+    private let completedCard = StatisticCardView()
+    private let averageCard = StatisticCardView()
+
+    private lazy var cardsStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [bestPeriodCard, idealDaysCard, completedCard, averageCard])
+        stack.axis = .vertical
+        stack.spacing = Constants.cardSpacing
+        stack.distribution = .fillEqually
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
         setupUI()
         bindViewModel()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.refresh()
     }
 
     // MARK: - Setup
@@ -53,15 +72,23 @@ final class StatisticsViewController: UIViewController {
         view.backgroundColor = AppColors.primaryBackground
         view.addSubview(emptyStateImageView)
         view.addSubview(emptyStateLabel)
+        view.addSubview(cardsStack)
+
         NSLayoutConstraint.activate([
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             emptyStateImageView.widthAnchor.constraint(equalToConstant: 80),
             emptyStateImageView.heightAnchor.constraint(equalToConstant: 80),
+
             emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: 8),
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+
+            cardsStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalPadding),
+            cardsStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalPadding),
+            cardsStack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+
+            bestPeriodCard.heightAnchor.constraint(equalToConstant: Constants.cardHeight),
         ])
     }
 
@@ -69,9 +96,36 @@ final class StatisticsViewController: UIViewController {
     private func bindViewModel() {
         viewModel.onStateUpdated = { [weak self] in
             guard let self else { return }
-            self.emptyStateImageView.isHidden = !self.viewModel.isEmpty
-            self.emptyStateLabel.isHidden = !self.viewModel.isEmpty
+            self.updateUI()
         }
-        viewModel.onStateUpdated?()
+        updateUI()
+    }
+
+    private func updateUI() {
+        let isEmpty = viewModel.isEmpty
+        emptyStateImageView.isHidden = !isEmpty
+        emptyStateLabel.isHidden = !isEmpty
+        cardsStack.isHidden = isEmpty
+
+        bestPeriodCard.configure(value: viewModel.bestPeriod, title: Strings.bestPeriod)
+        idealDaysCard.configure(value: viewModel.idealDays, title: Strings.idealDays)
+        completedCard.configure(value: viewModel.completedTrackers, title: Strings.completedTrackers)
+        averageCard.configure(value: viewModel.averagePerDay, title: Strings.averagePerDay)
+    }
+}
+
+// MARK: - Constants
+private extension StatisticsViewController {
+    enum Constants {
+        static let cardHeight: CGFloat = 90
+        static let cardSpacing: CGFloat = 12
+        static let horizontalPadding: CGFloat = 16
+    }
+
+    enum Strings {
+        static let bestPeriod = "stat_best_period".localized
+        static let idealDays = "stat_ideal_days".localized
+        static let completedTrackers = "stat_completed_trackers".localized
+        static let averagePerDay = "stat_average_per_day".localized
     }
 }
