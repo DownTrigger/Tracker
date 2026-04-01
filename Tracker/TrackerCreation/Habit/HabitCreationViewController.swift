@@ -28,6 +28,8 @@ final class HabitCreationViewController: TrackerCreationViewController {
         habitViewModel.isEditing ? Self.Strings.editScreenTitle : Self.Strings.screenTitle
     }
 
+    override var analyticsScreenName: String { "HabitCreation" }
+
     override var categoryRowCount: Int { 2 }
 
     // MARK: - Actions

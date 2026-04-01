@@ -61,6 +61,16 @@ final class OnboardingViewController: UIViewController {
         bindViewModel()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+    }
+
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = AppColors.primaryBackground
@@ -113,6 +123,7 @@ final class OnboardingViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func primaryButtonTapped() {
+        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "complete_onboarding")
         viewModel.completeOnboarding()
     }
 }
@@ -171,5 +182,6 @@ private extension OnboardingViewController {
 
     enum Strings {
         static let primaryButtonTitle = "onboarding_button_title".localized
+        static let analyticsScreen = "Onboarding"
     }
 }

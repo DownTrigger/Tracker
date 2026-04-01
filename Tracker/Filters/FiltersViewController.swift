@@ -38,6 +38,16 @@ final class FiltersViewController: UIViewController {
         setupUI()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+    }
+
     // MARK: - Setup
     private func setupUI() {
         title = Strings.screenTitle
@@ -86,6 +96,7 @@ extension FiltersViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let filter = viewModel.filters[indexPath.row]
+        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: filter.analyticsItem)
         viewModel.selectFilter(filter)
         onFilterSelected?(filter)
         dismiss(animated: true)
@@ -103,5 +114,6 @@ private extension FiltersViewController {
 
     enum Strings {
         static let screenTitle = "filter_title".localized
+        static let analyticsScreen = "Filters"
     }
 }

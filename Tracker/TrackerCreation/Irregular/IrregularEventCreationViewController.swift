@@ -14,6 +14,7 @@ final class IrregularEventCreationViewController: TrackerCreationViewController 
 
     // MARK: - Overrides
     override var screenTitle: String { Self.Strings.screenTitle }
+    override var analyticsScreenName: String { "IrregularEventCreation" }
 
     override var emojiToColorSectionSpacing: CGFloat { 4 }
 

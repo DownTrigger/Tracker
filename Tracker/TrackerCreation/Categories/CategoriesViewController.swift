@@ -68,6 +68,16 @@ final class CategoriesViewController: UIViewController {
         updateEmptyState()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+    }
+
     // MARK: - Setup
     private func setupUI() {
         title = Strings.screenTitle
@@ -132,6 +142,7 @@ final class CategoriesViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func addCategoryTapped() {
+        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "add_category")
         let newCategoryVC = NewCategoryViewController()
         newCategoryVC.onCategoryCreated = { [weak self] name in
             self?.viewModel.addCategory(name: name)
@@ -179,6 +190,7 @@ extension CategoriesViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension CategoriesViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "select_category")
         viewModel.selectCategory(at: indexPath.row)
     }
 
@@ -224,5 +236,6 @@ private extension CategoriesViewController {
         static let delete = "button_delete".localized
         static let deleteConfirmation = "alert_delete_category".localized
         static let cancel = "button_cancel".localized
+        static let analyticsScreen = "Categories"
     }
 }

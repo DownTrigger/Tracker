@@ -14,4 +14,13 @@ enum TrackerFilter: Int, CaseIterable {
         case .notCompleted: return "filter_not_completed".localized
         }
     }
+
+    var analyticsItem: String {
+        switch self {
+        case .all: return "all"
+        case .today: return "today"
+        case .completed: return "completed"
+        case .notCompleted: return "not_completed"
+        }
+    }
 }

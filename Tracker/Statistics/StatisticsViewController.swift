@@ -61,6 +61,16 @@ final class StatisticsViewController: UIViewController {
         viewModel.refresh()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+    }
+
     // MARK: - Setup
     private func setupNavigationBar() {
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -123,6 +133,7 @@ private extension StatisticsViewController {
     }
 
     enum Strings {
+        static let analyticsScreen = "Statistics"
         static let bestPeriod = "stat_best_period".localized
         static let idealDays = "stat_ideal_days".localized
         static let completedTrackers = "stat_completed_trackers".localized

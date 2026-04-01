@@ -100,6 +100,16 @@ class TrackerCreationViewController: UIViewController {
         bindViewModel()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.reportOpen(screen: analyticsScreenName)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.reportClose(screen: analyticsScreenName)
+    }
+
     // MARK: - Bindings
     private func bindViewModel() {
         viewModel.onFormValidityChanged = { [weak self] isValid in
@@ -156,14 +166,17 @@ class TrackerCreationViewController: UIViewController {
     }
 
     var screenTitle: String { "" }
+    var analyticsScreenName: String { "" }
 
     // MARK: - Actions
     @objc private func cancelTapped() {
+        AnalyticsService.shared.reportClick(screen: analyticsScreenName, item: "cancel")
         dismiss(animated: true)
     }
 
     @objc private func createTapped() {
         guard isCreateEnabled else { return }
+        AnalyticsService.shared.reportClick(screen: analyticsScreenName, item: "create")
         performCreate()
     }
 
