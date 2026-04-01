@@ -46,7 +46,9 @@ final class TextFieldCell: UITableViewCell {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { nil }
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     // MARK: - Public
     func configure(placeholder: String, currentText: String, onText: @escaping (String?) -> Void) {

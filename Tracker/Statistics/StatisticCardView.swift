@@ -30,7 +30,9 @@ final class StatisticCardView: UIView {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { nil }
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     // MARK: - Layout
     override func layoutSubviews() {
@@ -47,7 +49,6 @@ final class StatisticCardView: UIView {
     // MARK: - Private
     private func setup() {
         layer.cornerRadius = Constants.cornerRadius
-        layer.masksToBounds = true
 
         addSubview(valueLabel)
         addSubview(titleLabel)

@@ -4,7 +4,6 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - ViewModel
     private let viewModel: TrackersViewModel
-    private let categoryStore: TrackerCategoryStore
 
     // MARK: - UI
     private lazy var searchController: UISearchController = {
@@ -64,9 +63,8 @@ final class TrackersViewController: UIViewController {
     }()
 
     // MARK: - Init
-    init(viewModel: TrackersViewModel, categoryStore: TrackerCategoryStore) {
+    init(viewModel: TrackersViewModel) {
         self.viewModel = viewModel
-        self.categoryStore = categoryStore
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -222,7 +220,7 @@ final class TrackersViewController: UIViewController {
 
     @objc private func addTrackerTapped() {
         AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "add_track")
-        let typeSelectionVC = TrackerTypeSelectionViewController(categoryStore: categoryStore)
+        let typeSelectionVC = TrackerTypeSelectionViewController(categoryStore: viewModel.categoryStore)
         typeSelectionVC.onCreateTracker = { [weak self] tracker, categoryName in
             self?.addTracker(tracker, toCategoryWithTitle: categoryName)
         }
@@ -237,7 +235,7 @@ final class TrackersViewController: UIViewController {
             tracker: tracker,
             completedDays: completedDays,
             categoryName: categoryName,
-            categoryStore: categoryStore
+            categoryStore: viewModel.categoryStore
         )
         editVC.onCreateTracker = { [weak self] updatedTracker, updatedCategoryName in
             self?.viewModel.editTracker(updatedTracker, categoryName: updatedCategoryName)

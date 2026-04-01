@@ -371,12 +371,14 @@ extension TrackerCreationViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let section = Section(rawValue: indexPath.section) else {
-            fatalError("Unexpected section: \(indexPath.section)")
+            assertionFailure("Unexpected section: \(indexPath.section)")
+            return UITableViewCell()
         }
         switch section {
         case .name:
             guard let row = NameRow(rawValue: indexPath.row) else {
-                fatalError("Unexpected row in name section: \(indexPath.row)")
+                assertionFailure("Unexpected row in name section: \(indexPath.row)")
+                return UITableViewCell()
             }
             switch row {
             case .textField:

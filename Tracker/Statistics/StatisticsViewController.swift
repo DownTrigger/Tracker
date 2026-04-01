@@ -108,7 +108,6 @@ final class StatisticsViewController: UIViewController {
             guard let self else { return }
             self.updateUI()
         }
-        updateUI()
     }
 
     private func updateUI() {

@@ -42,7 +42,8 @@ final class HabitCreationViewController: TrackerCreationViewController {
 
     override func cellForCategoryRow(at indexPath: IndexPath) -> UITableViewCell {
         guard let row = CategoryRow(rawValue: indexPath.row) else {
-            fatalError("Unexpected row in category section: \(indexPath.row)")
+            assertionFailure("Unexpected row in category section: \(indexPath.row)")
+            return UITableViewCell()
         }
         switch row {
         case .category:

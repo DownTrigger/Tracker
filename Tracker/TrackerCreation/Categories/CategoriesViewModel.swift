@@ -17,8 +17,10 @@ final class CategoriesViewModel {
     init(store: TrackerCategoryStore, preselected: TrackerCategory? = nil) {
         self.store = store
         self.selectedCategory = preselected
+        let previous = store.onChange
         store.onChange = { [weak self] in
             self?.reloadCategories()
+            previous?()
         }
         reloadCategories()
     }

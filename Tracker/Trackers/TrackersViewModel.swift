@@ -17,7 +17,7 @@ final class TrackersViewModel {
     private(set) var activeFilter: TrackerFilter = .all
 
     // MARK: - Dependencies
-    private let categoryStore: TrackerCategoryStore
+    let categoryStore: TrackerCategoryStore
     private let trackerStore: TrackerStore
     private let recordStore: TrackerRecordStore
 

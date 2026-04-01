@@ -25,6 +25,8 @@ final class AnalyticsService {
         AppMetrica.reportEvent(name: event, parameters: params, onFailure: { error in
             print("AppMetrica error: \(error)")
         })
+        #if DEBUG
         print("Analytics: event=\(event), screen=\(screen)" + (item.map { ", item=\($0)" } ?? ""))
+        #endif
     }
 }

@@ -80,11 +80,9 @@ final class TrackerCell: UICollectionViewCell {
         completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupViewHierarchy()
-        setupConstraints()
-        completeButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
+        nil
     }
 
     // MARK: - Lifecycle
