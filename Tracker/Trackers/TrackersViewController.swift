@@ -84,6 +84,16 @@ final class TrackersViewController: UIViewController {
         bindViewModel()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+    }
+
     // MARK: - Setup
     private func setupNavigationBar() {
         navigationController?.setNavigationBarHidden(false, animated: false)
@@ -211,6 +221,7 @@ final class TrackersViewController: UIViewController {
     }
 
     @objc private func addTrackerTapped() {
+        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "add_track")
         let typeSelectionVC = TrackerTypeSelectionViewController(categoryStore: categoryStore)
         typeSelectionVC.onCreateTracker = { [weak self] tracker, categoryName in
             self?.addTracker(tracker, toCategoryWithTitle: categoryName)
@@ -236,6 +247,7 @@ final class TrackersViewController: UIViewController {
     }
 
     @objc private func filtersButtonTapped() {
+        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "filter")
         let filtersVM = FiltersViewModel(activeFilter: viewModel.activeFilter)
         let filtersVC = FiltersViewController(viewModel: filtersVM)
         filtersVC.onFilterSelected = { [weak self] filter in
@@ -281,6 +293,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 
         cell.onCompleteTapped = { [weak self] in
             guard let self, self.viewModel.canComplete(for: self.viewModel.currentDate) else { return }
+            AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "track")
             self.viewModel.toggleCompletion(trackerId: tracker.id)
         }
         return cell
@@ -326,9 +339,11 @@ extension TrackersViewController: UICollectionViewDelegate {
                 }
             }
             let edit = UIAction(title: Strings.edit) { [weak self] _ in
+                AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "edit")
                 self?.showEditTracker(tracker)
             }
             let delete = UIAction(title: Strings.delete, attributes: .destructive) { [weak self] _ in
+                AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "delete")
                 self?.showDeleteConfirmation(for: indexPath)
             }
             return UIMenu(title: "", children: [pin, edit, delete])
@@ -407,5 +422,6 @@ private extension TrackersViewController {
         static let delete = "context_menu_delete".localized
         static let deleteConfirmation = "alert_delete_tracker".localized
         static let cancel = "button_cancel".localized
+        static let analyticsScreen = "Main"
     }
 }
