@@ -40,12 +40,12 @@ final class FiltersViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+        AnalyticsService.reportOpen(screen: Strings.analyticsScreen)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+        AnalyticsService.reportClose(screen: Strings.analyticsScreen)
     }
 
     // MARK: - Setup
@@ -96,7 +96,7 @@ extension FiltersViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let filter = viewModel.filters[indexPath.row]
-        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: filter.analyticsItem)
+        AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: filter.analyticsItem)
         viewModel.selectFilter(filter)
         onFilterSelected?(filter)
         dismiss(animated: true)

@@ -38,7 +38,7 @@ final class TrackersSnapshotTests: XCTestCase {
             recordStore: stack.recordStore
         )
         viewModel.setDate(Self.fixedDate)
-        let vc = TrackersViewController(viewModel: viewModel, categoryStore: stack.categoryStore)
+        let vc = TrackersViewController(viewModel: viewModel)
         return UINavigationController(rootViewController: vc)
     }
 

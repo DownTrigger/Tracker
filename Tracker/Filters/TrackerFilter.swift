@@ -8,19 +8,19 @@ enum TrackerFilter: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .all: return "filter_all".localized
-        case .today: return "filter_today".localized
-        case .completed: return "filter_completed".localized
-        case .notCompleted: return "filter_not_completed".localized
+        case .all: "filter_all".localized
+        case .today: "filter_today".localized
+        case .completed: "filter_completed".localized
+        case .notCompleted: "filter_not_completed".localized
         }
     }
 
     var analyticsItem: String {
         switch self {
-        case .all: return "all"
-        case .today: return "today"
-        case .completed: return "completed"
-        case .notCompleted: return "not_completed"
+        case .all: "all"
+        case .today: "today"
+        case .completed: "completed"
+        case .notCompleted: "not_completed"
         }
     }
 }

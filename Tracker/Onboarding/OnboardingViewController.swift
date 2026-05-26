@@ -63,12 +63,12 @@ final class OnboardingViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+        AnalyticsService.reportOpen(screen: Strings.analyticsScreen)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+        AnalyticsService.reportClose(screen: Strings.analyticsScreen)
     }
 
     // MARK: - Setup
@@ -123,7 +123,7 @@ final class OnboardingViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func primaryButtonTapped() {
-        AnalyticsService.shared.reportClick(screen: Strings.analyticsScreen, item: "complete_onboarding")
+        AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "complete_onboarding")
         viewModel.completeOnboarding()
     }
 }

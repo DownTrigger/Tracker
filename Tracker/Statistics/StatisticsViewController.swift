@@ -63,12 +63,12 @@ final class StatisticsViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        AnalyticsService.shared.reportOpen(screen: Strings.analyticsScreen)
+        AnalyticsService.reportOpen(screen: Strings.analyticsScreen)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        AnalyticsService.shared.reportClose(screen: Strings.analyticsScreen)
+        AnalyticsService.reportClose(screen: Strings.analyticsScreen)
     }
 
     // MARK: - Setup
