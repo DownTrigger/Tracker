@@ -130,8 +130,8 @@ private extension TrackerTypeSelectionViewController {
     }
 
     enum Strings {
-        static let screenTitle = "Создание трекера"
-        static let habitTitle = "Привычка"
-        static let irregularEventTitle = "Нерегулярное событие"
+        static let screenTitle = "title_tracker_type_selection".localized
+        static let habitTitle = "button_habit".localized
+        static let irregularEventTitle = "button_irregular_event".localized
     }
 }

@@ -14,9 +14,10 @@ final class TrackersViewModel {
     private(set) var currentDate: Date = Date()
     private var searchText: String = ""
     private var completedIdsForDate: Set<UUID> = []
+    private(set) var activeFilter: TrackerFilter = .all
 
     // MARK: - Dependencies
-    private let categoryStore: TrackerCategoryStore
+    let categoryStore: TrackerCategoryStore
     private let trackerStore: TrackerStore
     private let recordStore: TrackerRecordStore
 
@@ -42,6 +43,15 @@ final class TrackersViewModel {
         onDataUpdated?()
     }
 
+    func setFilter(_ filter: TrackerFilter) {
+        activeFilter = filter
+        if filter == .today {
+            currentDate = Date()
+        }
+        rebuild()
+        onDataUpdated?()
+    }
+
     func toggleCompletion(trackerId: UUID) {
         if completedIdsForDate.contains(trackerId) {
             recordStore.deleteRecord(trackerId: trackerId, date: currentDate)
@@ -50,11 +60,44 @@ final class TrackersViewModel {
         }
     }
 
+    func pinTracker(id: UUID) {
+        trackerStore.pinTracker(id: id, isPinned: true)
+        allCategories = categoryStore.categories
+        rebuild()
+        onDataUpdated?()
+    }
+
+    func unpinTracker(id: UUID) {
+        trackerStore.pinTracker(id: id, isPinned: false)
+        allCategories = categoryStore.categories
+        rebuild()
+        onDataUpdated?()
+    }
+
     func deleteTracker(id: UUID) {
         trackerStore.deleteTracker(id: id)
         allCategories = categoryStore.categories
         rebuild()
         onDataUpdated?()
+    }
+
+    func editTracker(_ tracker: Tracker, categoryName: String) {
+        do {
+            try trackerStore.updateTracker(tracker, toCategoryWithTitle: categoryName)
+            allCategories = categoryStore.categories
+            rebuild()
+            onDataUpdated?()
+        } catch {
+            assertionFailure("TrackersViewModel: editTracker failed: \(error)")
+        }
+    }
+
+    func completedCount(for trackerId: UUID) -> Int {
+        completedRecords.filter { $0.trackerId == trackerId }.count
+    }
+
+    func categoryName(for trackerId: UUID) -> String {
+        allCategories.first { $0.trackers.contains { $0.id == trackerId } }?.title ?? ""
     }
 
     func addTracker(_ tracker: Tracker, categoryName: String) {
@@ -79,18 +122,18 @@ final class TrackersViewModel {
 
     func daysCountText(for trackerId: UUID) -> String {
         let n = completedDaysCount(for: trackerId)
-        let mod10 = n % 10
-        let mod100 = n % 100
-        if (11...14).contains(mod100) { return "\(n) дней" }
-        switch mod10 {
-        case 1: return "\(n) день"
-        case 2, 3, 4: return "\(n) дня"
-        default: return "\(n) дней"
-        }
+        return String(format: "days_count".localized, n)
     }
 
     func canComplete(for date: Date) -> Bool {
         !isFutureDate(date)
+    }
+
+    var hasTrackersForCurrentDate: Bool {
+        let weekday = Calendar.current.component(.weekday, from: currentDate)
+        return allCategories.contains { category in
+            category.trackers.contains { $0.schedule.contains(weekday) }
+        }
     }
 
     // MARK: - Private
@@ -125,7 +168,7 @@ final class TrackersViewModel {
         var result = allCategories.map { category in
             TrackerCategory(
                 title: category.title,
-                trackers: category.trackers.filter { $0.schedule.contains(weekday) }
+                trackers: category.trackers.filter { $0.schedule.contains(weekday) && !$0.isPinned }
             )
         }.filter { !$0.trackers.isEmpty }
         if !searchText.isEmpty {
@@ -137,6 +180,16 @@ final class TrackersViewModel {
                     }
                 )
             }.filter { !$0.trackers.isEmpty }
+        }
+        result = applyFilter(to: result)
+
+        let pinnedTrackers = allCategories
+            .flatMap { $0.trackers }
+            .filter { $0.isPinned && $0.schedule.contains(weekday) }
+            .filter { applyFilterToTracker($0) }
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategory = TrackerCategory(title: Constants.pinnedCategoryTitle, trackers: pinnedTrackers)
+            result.insert(pinnedCategory, at: 0)
         }
         displayedCategories = result
     }
@@ -150,7 +203,32 @@ final class TrackersViewModel {
         )
     }
 
+    private func applyFilter(to categories: [TrackerCategory]) -> [TrackerCategory] {
+        guard activeFilter == .completed || activeFilter == .notCompleted else { return categories }
+        return categories.map { category in
+            TrackerCategory(
+                title: category.title,
+                trackers: category.trackers.filter { applyFilterToTracker($0) }
+            )
+        }.filter { !$0.trackers.isEmpty }
+    }
+
+    private func applyFilterToTracker(_ tracker: Tracker) -> Bool {
+        switch activeFilter {
+        case .all, .today: return true
+        case .completed: return completedIdsForDate.contains(tracker.id)
+        case .notCompleted: return !completedIdsForDate.contains(tracker.id)
+        }
+    }
+
     private func isFutureDate(_ date: Date) -> Bool {
         Calendar.current.compare(date, to: Date(), toGranularity: .day) == .orderedDescending
+    }
+}
+
+// MARK: - Constants
+private extension TrackersViewModel {
+    enum Constants {
+        static let pinnedCategoryTitle = "category_pinned".localized
     }
 }

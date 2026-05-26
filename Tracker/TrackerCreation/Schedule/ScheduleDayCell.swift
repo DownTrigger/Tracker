@@ -35,7 +35,9 @@ final class ScheduleDayCell: UITableViewCell {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { nil }
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     // MARK: - Private
     private func setupViewHierarchy() {

@@ -4,7 +4,6 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - ViewModel
     private let viewModel: TrackersViewModel
-    private let categoryStore: TrackerCategoryStore
 
     // MARK: - UI
     private lazy var searchController: UISearchController = {
@@ -46,17 +45,26 @@ final class TrackersViewController: UIViewController {
 
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = Strings.emptyStateText
         label.font = UIFont.systemFont(ofSize: Constants.emptyStateFontSize)
         label.textAlignment = .center
         label.numberOfLines = 0
         return label
     }()
 
+    private lazy var filtersButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(Strings.filtersButton, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: Constants.filterButtonFontSize)
+        button.backgroundColor = AppColors.accentBlue
+        button.layer.cornerRadius = Constants.filterButtonCornerRadius
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     // MARK: - Init
-    init(viewModel: TrackersViewModel, categoryStore: TrackerCategoryStore) {
+    init(viewModel: TrackersViewModel) {
         self.viewModel = viewModel
-        self.categoryStore = categoryStore
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -72,6 +80,16 @@ final class TrackersViewController: UIViewController {
         setupUI()
         setupButtonActions()
         bindViewModel()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.reportClose(screen: Strings.analyticsScreen)
     }
 
     // MARK: - Setup
@@ -110,6 +128,7 @@ final class TrackersViewController: UIViewController {
         view.backgroundColor = AppColors.primaryBackground
         setupViewHierarchy()
         setupConstraints()
+        collectionView.contentInset.bottom = Constants.filterButtonHeight + Constants.filterButtonBottomSpacing * 2
         updateEmptyStateVisibility()
     }
 
@@ -117,6 +136,7 @@ final class TrackersViewController: UIViewController {
         view.addSubview(collectionView)
         view.addSubview(emptyStateImageView)
         view.addSubview(emptyStateLabel)
+        view.addSubview(filtersButton)
         emptyStateImageView.translatesAutoresizingMaskIntoConstraints = false
         emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
     }
@@ -127,16 +147,21 @@ final class TrackersViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
+
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.heightAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
             emptyStateImageView.widthAnchor.constraint(equalToConstant: Constants.emptyStateImageSize),
-              
+
             emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Constants.emptyStateSpacing),
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalPadding),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalPadding),
-            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+
+            filtersButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.filterButtonBottomSpacing),
+            filtersButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filtersButton.widthAnchor.constraint(equalToConstant: Constants.filterButtonWidth),
+            filtersButton.heightAnchor.constraint(equalToConstant: Constants.filterButtonHeight)
         ])
     }
 
@@ -144,6 +169,7 @@ final class TrackersViewController: UIViewController {
         customDatePicker.onDateChanged = { [weak self] date in
             self?.viewModel.setDate(date)
         }
+        filtersButton.addTarget(self, action: #selector(filtersButtonTapped), for: .touchUpInside)
     }
 
     private func bindViewModel() {
@@ -155,10 +181,26 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - Helpers
     private func updateEmptyStateVisibility() {
-        let hasTrackersToShow = viewModel.displayedCategories.contains { !$0.trackers.isEmpty }
-        emptyStateImageView.isHidden = hasTrackersToShow
-        emptyStateLabel.isHidden = hasTrackersToShow
-        collectionView.isHidden = !hasTrackersToShow
+        let hasDisplayed = viewModel.displayedCategories.contains { !$0.trackers.isEmpty }
+        let hasForDate = viewModel.hasTrackersForCurrentDate
+
+        if hasDisplayed {
+            emptyStateImageView.isHidden = true
+            emptyStateLabel.isHidden = true
+            collectionView.isHidden = false
+        } else if hasForDate {
+            emptyStateImageView.isHidden = false
+            emptyStateLabel.isHidden = false
+            emptyStateLabel.text = Strings.nothingFoundText
+            collectionView.isHidden = true
+        } else {
+            emptyStateImageView.isHidden = false
+            emptyStateLabel.isHidden = false
+            emptyStateLabel.text = Strings.emptyStateText
+            collectionView.isHidden = true
+        }
+
+        filtersButton.isHidden = !hasForDate
     }
 
     // MARK: - Actions
@@ -177,11 +219,43 @@ final class TrackersViewController: UIViewController {
     }
 
     @objc private func addTrackerTapped() {
-        let typeSelectionVC = TrackerTypeSelectionViewController(categoryStore: categoryStore)
+        AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "add_track")
+        let typeSelectionVC = TrackerTypeSelectionViewController(categoryStore: viewModel.categoryStore)
         typeSelectionVC.onCreateTracker = { [weak self] tracker, categoryName in
             self?.addTracker(tracker, toCategoryWithTitle: categoryName)
         }
         let nav = UINavigationController(rootViewController: typeSelectionVC)
+        present(nav, animated: true)
+    }
+
+    private func showEditTracker(_ tracker: Tracker) {
+        let completedDays = viewModel.completedCount(for: tracker.id)
+        let categoryName = viewModel.categoryName(for: tracker.id)
+        let editVC = HabitCreationViewController(
+            tracker: tracker,
+            completedDays: completedDays,
+            categoryName: categoryName,
+            categoryStore: viewModel.categoryStore
+        )
+        editVC.onCreateTracker = { [weak self] updatedTracker, updatedCategoryName in
+            self?.viewModel.editTracker(updatedTracker, categoryName: updatedCategoryName)
+        }
+        let nav = UINavigationController(rootViewController: editVC)
+        present(nav, animated: true)
+    }
+
+    @objc private func filtersButtonTapped() {
+        AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "filter")
+        let filtersVM = FiltersViewModel(activeFilter: viewModel.activeFilter)
+        let filtersVC = FiltersViewController(viewModel: filtersVM)
+        filtersVC.onFilterSelected = { [weak self] filter in
+            guard let self else { return }
+            self.viewModel.setFilter(filter)
+            if filter == .today {
+                self.customDatePicker.date = Date()
+            }
+        }
+        let nav = UINavigationController(rootViewController: filtersVC)
         present(nav, animated: true)
     }
 }
@@ -211,11 +285,13 @@ extension TrackersViewController: UICollectionViewDataSource {
             color: TrackerColors.color(at: tracker.color),
             daysText: viewModel.daysCountText(for: tracker.id),
             isCompletedForSelectedDate: isCompleted,
-            canComplete: canComplete
+            canComplete: canComplete,
+            isPinned: tracker.isPinned
         ))
 
         cell.onCompleteTapped = { [weak self] in
             guard let self, self.viewModel.canComplete(for: self.viewModel.currentDate) else { return }
+            AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "track")
             self.viewModel.toggleCompletion(trackerId: tracker.id)
         }
         return cell
@@ -249,11 +325,23 @@ extension TrackersViewController: UICollectionViewDelegate {
         contextMenuConfigurationForItemAt indexPath: IndexPath,
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
-        UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+        let tracker = viewModel.displayedCategories[indexPath.section].trackers[indexPath.item]
+        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
-            let pin = UIAction(title: Strings.pin) { _ in }
-            let edit = UIAction(title: Strings.edit) { _ in }
+            let pinTitle = tracker.isPinned ? Strings.unpin : Strings.pin
+            let pin = UIAction(title: pinTitle) { [weak self] _ in
+                if tracker.isPinned {
+                    self?.viewModel.unpinTracker(id: tracker.id)
+                } else {
+                    self?.viewModel.pinTracker(id: tracker.id)
+                }
+            }
+            let edit = UIAction(title: Strings.edit) { [weak self] _ in
+                AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "edit")
+                self?.showEditTracker(tracker)
+            }
             let delete = UIAction(title: Strings.delete, attributes: .destructive) { [weak self] _ in
+                AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "delete")
                 self?.showDeleteConfirmation(for: indexPath)
             }
             return UIMenu(title: "", children: [pin, edit, delete])
@@ -311,16 +399,27 @@ private extension TrackersViewController {
         static let addButtonContainerHeight: CGFloat = 44
         static let addButtonSize: CGFloat = 44
         static let addButtonLeadingOffset: CGFloat = -12
+
+        // MARK: - Filters button
+        static let filterButtonWidth: CGFloat = 114
+        static let filterButtonHeight: CGFloat = 50
+        static let filterButtonBottomSpacing: CGFloat = 16
+        static let filterButtonCornerRadius: CGFloat = 16
+        static let filterButtonFontSize: CGFloat = 17
     }
 
     enum Strings {
-        static let screenTitle = "Трекеры"
-        static let searchPlaceholder = "Поиск"
-        static let emptyStateText = "Что будем отслеживать?"
-        static let pin = "Закрепить"
-        static let edit = "Редактировать"
-        static let delete = "Удалить"
-        static let deleteConfirmation = "Уверены что хотите удалить трекер?"
-        static let cancel = "Отменить"
+        static let screenTitle = "title_trackers".localized
+        static let searchPlaceholder = "search_placeholder_trackers".localized
+        static let emptyStateText = "empty_state_trackers".localized
+        static let nothingFoundText = "empty_state_nothing_found".localized
+        static let filtersButton = "button_filters".localized
+        static let pin = "context_menu_pin".localized
+        static let unpin = "context_menu_unpin".localized
+        static let edit = "context_menu_edit".localized
+        static let delete = "context_menu_delete".localized
+        static let deleteConfirmation = "alert_delete_tracker".localized
+        static let cancel = "button_cancel".localized
+        static let analyticsScreen = "Main"
     }
 }

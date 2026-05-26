@@ -35,18 +35,19 @@ final class TabBarViewController: UITabBarController {
             trackerStore: stack.trackerStore,
             recordStore: stack.recordStore
         )
-        let trackersViewController = TrackersViewController(viewModel: trackersViewModel, categoryStore: stack.categoryStore)
+        let trackersViewController = TrackersViewController(viewModel: trackersViewModel)
         let trackersNavController = UINavigationController(rootViewController: trackersViewController)
         trackersViewController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: "tab_trackers".localized,
             image: UIImage(resource: .iconCircle),
             selectedImage: nil
         )
 
-        let statisticsViewController = StatisticsViewController()
+        let statisticsViewModel = StatisticsViewModel(recordStore: stack.recordStore, categoryStore: stack.categoryStore)
+        let statisticsViewController = StatisticsViewController(viewModel: statisticsViewModel)
         let statisticsNavController = UINavigationController(rootViewController: statisticsViewController)
         statisticsViewController.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: "tab_statistics".localized,
             image: UIImage(resource: .iconHare),
             selectedImage: nil
         )

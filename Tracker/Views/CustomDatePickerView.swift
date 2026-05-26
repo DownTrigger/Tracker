@@ -72,13 +72,9 @@ final class CustomDatePickerView: UIView {
         datePicker.addGestureRecognizer(pressGesture)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupViewHierarchy()
-        setupConstraints()
-        updateDateLabel()
-        datePicker.addTarget(self, action: #selector(pickerValueChanged), for: .valueChanged)
-        datePicker.addGestureRecognizer(pressGesture)
+        nil
     }
 
     // MARK: - Private

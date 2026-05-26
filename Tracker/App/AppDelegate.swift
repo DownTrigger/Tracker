@@ -1,10 +1,13 @@
 import UIKit
+import AppMetricaCore
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - UIApplicationDelegate
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        guard let configuration = AppMetricaConfiguration(apiKey: "APPMETRICA_API_KEY") else { return true }
+        AppMetrica.activate(with: configuration)
         return true
     }
 

@@ -2,9 +2,29 @@ import Foundation
 
 final class HabitCreationViewModel: TrackerCreationViewModel {
 
+    // MARK: - Private
+    private var editingTrackerId: UUID?
+    private var editingIsPinned: Bool = false
+
+    // MARK: - Override
+    override var completedDays: Int { _completedDays }
+    private var _completedDays: Int = 0
+
     // MARK: - Init
     override init(categoryStore: TrackerCategoryStore) {
         super.init(categoryStore: categoryStore)
+    }
+
+    init(tracker: Tracker, completedDays: Int, categoryStore: TrackerCategoryStore) {
+        super.init(categoryStore: categoryStore)
+        editingTrackerId = tracker.id
+        editingIsPinned = tracker.isPinned
+        trackerName = tracker.name
+        selectedEmoji = tracker.emoji
+        selectedColorIndex = tracker.color
+        selectedWeekdays = Set(tracker.schedule.compactMap { WeekDay(rawValue: $0) })
+        _completedDays = completedDays
+        isEditing = true
     }
 
     // MARK: - State
@@ -21,7 +41,7 @@ final class HabitCreationViewModel: TrackerCreationViewModel {
     var scheduleSubtitle: String {
         if selectedWeekdays.isEmpty { return "" }
         let sorted = selectedWeekdays.sorted { $0.rawValue < $1.rawValue }
-        if sorted.count == 7 { return "Каждый день" }
+        if sorted.count == 7 { return "schedule_every_day".localized }
         return sorted.map { $0.shortTitle }.joined(separator: ", ")
     }
 
@@ -30,8 +50,12 @@ final class HabitCreationViewModel: TrackerCreationViewModel {
         let schedule = selectedWeekdays
             .sorted { $0.rawValue < $1.rawValue }
             .map(\.rawValue)
+        let name = trackerName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let id = editingTrackerId {
+            return Tracker(id: id, name: name, color: selectedColorIndex, emoji: selectedEmoji, schedule: schedule, isPinned: editingIsPinned)
+        }
         return Tracker.create(
-            name: trackerName.trimmingCharacters(in: .whitespacesAndNewlines),
+            name: name,
             schedule: schedule,
             emoji: selectedEmoji,
             colorIndex: selectedColorIndex

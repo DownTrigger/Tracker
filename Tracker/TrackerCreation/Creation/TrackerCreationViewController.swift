@@ -63,9 +63,18 @@ class TrackerCreationViewController: UIViewController {
         return button
     }()
 
+    private lazy var daysCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: Constants.daysCountFontSize, weight: .bold)
+        label.textColor = AppColors.primaryLabel
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(Strings.create, for: .normal)
+        button.setTitle(viewModel.createButtonTitle, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
         button.backgroundColor = AppColors.primaryLabel
         button.setTitleColor(AppColors.primaryBackground, for: .normal)
@@ -91,6 +100,16 @@ class TrackerCreationViewController: UIViewController {
         bindViewModel()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.reportOpen(screen: analyticsScreenName)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.reportClose(screen: analyticsScreenName)
+    }
+
     // MARK: - Bindings
     private func bindViewModel() {
         viewModel.onFormValidityChanged = { [weak self] isValid in
@@ -106,6 +125,10 @@ class TrackerCreationViewController: UIViewController {
         navigationItem.setHidesBackButton(true, animated: false)
         view.backgroundColor = AppColors.primaryBackground
         additionalSafeAreaInsets = Constants.additionalSafeAreaInsets
+        createButton.setTitle(viewModel.createButtonTitle, for: .normal)
+        if viewModel.isEditing {
+            daysCountLabel.text = String(format: "days_count".localized, viewModel.completedDays)
+        }
         setupViewHierarchy()
         setupConstraints()
     }
@@ -115,11 +138,23 @@ class TrackerCreationViewController: UIViewController {
         view.addSubview(buttonStack)
         buttonStack.addArrangedSubview(cancelButton)
         buttonStack.addArrangedSubview(createButton)
+        if viewModel.isEditing {
+            view.addSubview(daysCountLabel)
+        }
     }
 
     private func setupConstraints() {
+        if viewModel.isEditing {
+            NSLayoutConstraint.activate([
+                daysCountLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.daysCountTopPadding),
+                daysCountLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                daysCountLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                tableView.topAnchor.constraint(equalTo: daysCountLabel.bottomAnchor, constant: Constants.daysCountBottomPadding)
+            ])
+        } else {
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        }
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -Constants.tableViewBottomPadding),
@@ -131,14 +166,17 @@ class TrackerCreationViewController: UIViewController {
     }
 
     var screenTitle: String { "" }
+    var analyticsScreenName: String { "" }
 
     // MARK: - Actions
     @objc private func cancelTapped() {
+        AnalyticsService.reportClick(screen: analyticsScreenName, item: "cancel")
         dismiss(animated: true)
     }
 
     @objc private func createTapped() {
         guard isCreateEnabled else { return }
+        AnalyticsService.reportClick(screen: analyticsScreenName, item: "create")
         performCreate()
     }
 
@@ -294,18 +332,22 @@ private extension TrackerCreationViewController {
         static let emojiSectionVerticalInsetTotal: CGFloat = 48
         static let colorSectionVerticalInsetTotal: CGFloat = 48
 
+        // MARK: - Days count label
+        static let daysCountFontSize: CGFloat = 32
+        static let daysCountTopPadding: CGFloat = 24
+        static let daysCountBottomPadding: CGFloat = 8
     }
 
     enum Strings {
         // MARK: - Buttons
-        static let cancel = "Отменить"
-        static let create = "Создать"
+        static let cancel = "button_cancel".localized
+        static let create = "button_create".localized
 
         // MARK: - Labels & placeholders
-        static let namePlaceholder = "Введите название трекера"
-        static let categoryTitle = "Категория"
-        static let emojiSectionTitle = "Emoji"
-        static let colorSectionTitle = "Цвет"
+        static let namePlaceholder = "placeholder_tracker_name".localized
+        static let categoryTitle = "title_category".localized
+        static let emojiSectionTitle = "section_title_emoji".localized
+        static let colorSectionTitle = "section_title_color".localized
     }
 }
 
@@ -329,12 +371,14 @@ extension TrackerCreationViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let section = Section(rawValue: indexPath.section) else {
-            fatalError("Unexpected section: \(indexPath.section)")
+            assertionFailure("Unexpected section: \(indexPath.section)")
+            return UITableViewCell()
         }
         switch section {
         case .name:
             guard let row = NameRow(rawValue: indexPath.row) else {
-                fatalError("Unexpected row in name section: \(indexPath.row)")
+                assertionFailure("Unexpected row in name section: \(indexPath.row)")
+                return UITableViewCell()
             }
             switch row {
             case .textField:

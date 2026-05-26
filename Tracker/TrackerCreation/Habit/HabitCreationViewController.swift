@@ -12,12 +12,23 @@ final class HabitCreationViewController: TrackerCreationViewController {
         super.init(viewModel: vm)
     }
 
+    init(tracker: Tracker, completedDays: Int, categoryName: String, categoryStore: TrackerCategoryStore) {
+        let vm = HabitCreationViewModel(tracker: tracker, completedDays: completedDays, categoryStore: categoryStore)
+        vm.selectedCategoryTitle = categoryName
+        self.habitViewModel = vm
+        super.init(viewModel: vm)
+    }
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         nil
     }
 
-    override var screenTitle: String { Self.Strings.screenTitle }
+    override var screenTitle: String {
+        habitViewModel.isEditing ? Self.Strings.editScreenTitle : Self.Strings.screenTitle
+    }
+
+    override var analyticsScreenName: String { "HabitCreation" }
 
     override var categoryRowCount: Int { 2 }
 
@@ -31,7 +42,8 @@ final class HabitCreationViewController: TrackerCreationViewController {
 
     override func cellForCategoryRow(at indexPath: IndexPath) -> UITableViewCell {
         guard let row = CategoryRow(rawValue: indexPath.row) else {
-            fatalError("Unexpected row in category section: \(indexPath.row)")
+            assertionFailure("Unexpected row in category section: \(indexPath.row)")
+            return UITableViewCell()
         }
         switch row {
         case .category:
@@ -87,7 +99,8 @@ private extension HabitCreationViewController {
 // MARK: - Strings
 private extension HabitCreationViewController {
     enum Strings {
-        static let screenTitle = "Новая привычка"
-        static let scheduleTitle = "Расписание"
+        static let screenTitle = "title_new_habit".localized
+        static let editScreenTitle = "title_edit_habit".localized
+        static let scheduleTitle = "title_schedule".localized
     }
 }

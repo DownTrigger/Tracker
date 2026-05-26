@@ -34,10 +34,9 @@ final class ColorSelectionView: UIView {
         setupConstraints()
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupViewHierarchy()
-        setupConstraints()
+        nil
     }
 
     // MARK: - Public

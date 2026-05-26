@@ -9,6 +9,6 @@ extension TrackerCD {
             let scheduleData = schedule,
             let schedule = try? JSONDecoder().decode([Int].self, from: scheduleData)
         else { return nil }
-        return Tracker(id: id, name: name, color: Int(color), emoji: emoji, schedule: schedule)
+        return Tracker(id: id, name: name, color: Int(color), emoji: emoji, schedule: schedule, isPinned: isPinned)
     }
 }

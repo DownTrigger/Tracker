@@ -6,4 +6,5 @@ struct Tracker {
     let color: Int
     let emoji: String
     let schedule: [Int]
+    let isPinned: Bool
 }

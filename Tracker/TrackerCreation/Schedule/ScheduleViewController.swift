@@ -123,7 +123,7 @@ private extension ScheduleViewController {
     }
 
     enum Strings {
-        static let screenTitle = "Расписание"
-        static let done = "Готово"
+        static let screenTitle = "title_schedule".localized
+        static let done = "button_done".localized
     }
 }

@@ -5,7 +5,7 @@ final class TextFieldCell: UITableViewCell {
     // MARK: - Constants
     static let reuseId = "TextFieldCell"
     static let maxNameLength = 38
-    static let nameLimitFooterText = "Ограничение 38 символов"
+    static let nameLimitFooterText = "tracker_name_limit".localized
     static let nameLimitCellReuseId = "NameLimitCell"
 
     // MARK: - UI
@@ -46,7 +46,9 @@ final class TextFieldCell: UITableViewCell {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { nil }
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     // MARK: - Public
     func configure(placeholder: String, currentText: String, onText: @escaping (String?) -> Void) {

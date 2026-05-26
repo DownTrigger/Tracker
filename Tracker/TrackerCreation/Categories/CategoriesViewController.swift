@@ -68,6 +68,16 @@ final class CategoriesViewController: UIViewController {
         updateEmptyState()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.reportOpen(screen: Strings.analyticsScreen)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.reportClose(screen: Strings.analyticsScreen)
+    }
+
     // MARK: - Setup
     private func setupUI() {
         title = Strings.screenTitle
@@ -76,7 +86,6 @@ final class CategoriesViewController: UIViewController {
         additionalSafeAreaInsets = UIEdgeInsets(top: -10, left: 0, bottom: 0, right: 0)
         setupViewHierarchy()
         setupConstraints()
-        setupLongPress()
     }
 
     private func setupViewHierarchy() {
@@ -110,10 +119,6 @@ final class CategoriesViewController: UIViewController {
         ])
     }
 
-    private func setupLongPress() {
-        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
-        tableView.addGestureRecognizer(gesture)
-    }
 
     // MARK: - Bindings
     private func bindViewModel() {
@@ -137,6 +142,7 @@ final class CategoriesViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func addCategoryTapped() {
+        AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "add_category")
         let newCategoryVC = NewCategoryViewController()
         newCategoryVC.onCategoryCreated = { [weak self] name in
             self?.viewModel.addCategory(name: name)
@@ -144,16 +150,22 @@ final class CategoriesViewController: UIViewController {
         navigationController?.pushViewController(newCategoryVC, animated: true)
     }
 
-    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
-        guard gesture.state == .began else { return }
-        let point = gesture.location(in: tableView)
-        guard let indexPath = tableView.indexPathForRow(at: point) else { return }
+    private func showDeleteConfirmation(at index: Int) {
         let alert = UIAlertController(title: nil, message: Strings.deleteConfirmation, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: Strings.delete, style: .destructive) { [weak self] _ in
-            self?.viewModel.deleteCategory(at: indexPath.row)
+            self?.viewModel.deleteCategory(at: index)
         })
         alert.addAction(UIAlertAction(title: Strings.cancel, style: .cancel))
         present(alert, animated: true)
+    }
+
+    private func showEditCategory(at index: Int) {
+        let currentName = viewModel.categories[index].title
+        let editVC = NewCategoryViewController(initialName: currentName)
+        editVC.onCategoryCreated = { [weak self] newName in
+            self?.viewModel.renameCategory(at: index, newName: newName)
+        }
+        navigationController?.pushViewController(editVC, animated: true)
     }
 }
 
@@ -178,7 +190,25 @@ extension CategoriesViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension CategoriesViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        AnalyticsService.reportClick(screen: Strings.analyticsScreen, item: "select_category")
         viewModel.selectCategory(at: indexPath.row)
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+            let edit = UIAction(title: Strings.edit) { [weak self] _ in
+                self?.showEditCategory(at: indexPath.row)
+            }
+            let delete = UIAction(title: Strings.delete, attributes: .destructive) { [weak self] _ in
+                self?.showDeleteConfirmation(at: indexPath.row)
+            }
+            return UIMenu(title: "", children: [edit, delete])
+        }
     }
 }
 
@@ -199,11 +229,13 @@ private extension CategoriesViewController {
     }
 
     enum Strings {
-        static let screenTitle = "Категория"
-        static let addCategory = "Добавить категорию"
-        static let emptyState = "Привычки и события можно\nобъединить по смыслу"
-        static let delete = "Удалить"
-        static let deleteConfirmation = "Эта категория точно не нужна?"
-        static let cancel = "Отменить"
+        static let screenTitle = "title_category".localized
+        static let addCategory = "button_add_category".localized
+        static let emptyState = "empty_state_categories".localized
+        static let edit = "context_menu_edit".localized
+        static let delete = "button_delete".localized
+        static let deleteConfirmation = "alert_delete_category".localized
+        static let cancel = "button_cancel".localized
+        static let analyticsScreen = "Categories"
     }
 }
